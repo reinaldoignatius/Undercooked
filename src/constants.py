@@ -14,6 +14,9 @@ PROCESS_COOKED = 'cooked'
 
 ACTION_WALK = 'walk'
 ACTION_DASH = 'dash'
+ACTION_USE = 'use'
+ACTION_PICK = 'pick'
+ACTION_PUT = 'put'
 
 WALK_DISTANCE = 1
 DASH_DISTANCE = 3

@@ -1,7 +1,8 @@
+from useable_object import UsableObect
 from ingredient import Ingredient
 import constants
 
-class CuttingBoard():
+class CuttingBoard(UsableObect):
     def __init__(self):
         self.content = None
 
@@ -10,7 +11,7 @@ class CuttingBoard():
             self.content = chef.held_item
             chef.held_item = None
 
-    def use(self, id):
+    def use(self):
         if isinstance(self.content, Ingredient):
             if not self.content.processes_done:
                 if self.content.progress < constants.CUT_TICKS:

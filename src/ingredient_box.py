@@ -1,6 +1,7 @@
+from useable_object import UsableObect
 from ingredient import Ingredient
 
-class IngredientBox():
+class IngredientBox(UsableObect):
     def __init__(self, world, name):
         self.world = world
         self.name = name
@@ -21,6 +22,6 @@ class IngredientBox():
 
     def print(self):
         if self.content:
-            self.content(print)
+            self.content.print()
         else:
             self.print_static()

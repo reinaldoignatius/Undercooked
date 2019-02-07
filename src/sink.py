@@ -1,8 +1,9 @@
 import constants
 
+from useable_object import UsableObect
 from plate import Plate
 
-class Sink():
+class Sink(UsableObect):
     def __init__(self):
         self.__progress = 0
         self.__dirty_plates = []

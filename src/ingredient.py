@@ -5,4 +5,4 @@ class Ingredient():
         self.progress = 0
 
     def print(self):
-        print(self.name)
+        print(self.name, end="")
