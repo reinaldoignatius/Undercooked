@@ -1,21 +1,26 @@
+from table import Table
+from spawner import Spawner
 from useable_object import UsableObect
 from ingredient import Ingredient
 
-class IngredientBox(UsableObect):
-    def __init__(self, world, name):
+class IngredientBox(Table, Spawner, UsableObect):
+    def __init__(self, world, name, x, y):
+        Table.__init__(self)
+        Spawner.__init__(self, x, y)
         self.world = world
         self.name = name
-        self.content = None
 
-    def put_on_chef_held_item(self, chef):
+    def spawn(self):
         if not self.content:
-            self.content = chef.held_item
-            chef.held_item = None
+            self.content = Ingredient(
+                self.name.lower(),
+                self.x,
+                self.y
+            )
+            self.world.ingredients.append(self.content)
 
     def use(self):
-        if not self.content:
-            self.content = Ingredient(self.name.lower())
-            self.world.ingredients.append(self.content)
+        self.spawn()
 
     def print_static(self):
         print(self.name, end='')

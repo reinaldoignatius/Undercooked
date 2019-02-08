@@ -56,18 +56,31 @@ class World():
                                 self.map[row][col].content = GarbageBin()
                             elif char == 'M':
                                 self.map[row][col].content = Mixer()
-                                self.map[row][col].content.content = Bowl(self.__current_bowl_id)
+                                self.map[row][col].content.content = Bowl(
+                                    id=self.__current_bowl_id,
+                                    x=col,
+                                    y=row                             
+                                )
                                 self.bowls.append(self.map[row][col].content.content)
                                 self.__current_bowl_id = ')'
                             elif char == 'O':
                                 self.map[row][col].content = Stove()
-                                self.map[row][col].content.content = CookableContainer(self.__current_cookable_container_id)
+                                self.map[row][col].content.content = CookableContainer(
+                                    id=self.__current_cookable_container_id,
+                                    x=col,
+                                    y=row
+                                )
                                 self.cookeable_containers.append(self.map[row][col].content.content)
                                 self.__current_cookable_container_id = '+'
                             elif char == 'T':
                                 self.map[row][col].content = CuttingBoard()
                             else:
-                                self.map[row][col].content = IngredientBox(self, char)
+                                self.map[row][col].content = IngredientBox(
+                                    world=self, 
+                                    name=char,
+                                    x=col,
+                                    y=row
+                                )
                         
         with open('levels/%s/pos.json' % level_name) as infile:
             position = json.load(infile)
@@ -81,7 +94,11 @@ class World():
                 self.chefs.append(self.map[chef_position['y']][chef_position['x']].content)
 
             for idx, plate_position in enumerate(position.get('plates')):
-                self.map[plate_position['y']][plate_position['x']].content.content = Plate(idx + 5)
+                self.map[plate_position['y']][plate_position['x']].content.content = Plate(
+                    idx + 5,
+                    plate_position['y'],
+                    plate_position['x']
+                )
                 self.plates.append(self.map[plate_position['y']][plate_position['x']].content.content)
 
 
@@ -139,6 +156,30 @@ class World():
                 self.map[chef.y + 1][chef.x].content.use()
 
 
+    def __handle_pick_action(self, chef, direction):
+        if not chef.held_item:
+            if direction == constants.DIRECTION_UP and isinstance(self.map[chef.y - 1][chef.x].content, Table):
+                chef.held_item = self.map[chef.y - 1][chef.x].content.put_off_content()
+            elif direction == constants.DIRECTION_LEFT and isinstance(self.map[chef.y][chef.x - 1].content, Table):
+                chef.held_item = self.map[chef.y][chef.x - 1].content.put_off_content()
+            elif direction == constants.DIRECTION_RIGHT and isinstance(self.map[chef.y][chef.x + 1].content, Table):
+                chef.held_item = self.map[chef.y][chef.x + 1].content.put_off_content()
+            elif direction == constants.DIRECTION_DOWN and isinstance(self.map[chef.y + 1][chef.x].content, Table):
+                chef.held_item = self.map[chef.y + 1][chef.x].content.put_off_content()
+            
+
+    def __handle_put_action(self, chef, direction):
+        if chef.held_item:
+            if direction == constants.DIRECTION_UP and self.map[chef.y - 1][chef.x].content and not isinstance(self.map[chef.y - 1][chef.x].content, Wall):
+                self.map[chef.y - 1][chef.x].content.put_on_chef_held_item(chef)
+            elif direction == constants.DIRECTION_LEFT and self.map[chef.y][chef.x - 1].content and not isinstance(self.map[chef.y][chef.x - 1].content, Wall):
+                self.map[chef.y][chef.x - 1].content.put_on_chef_held_item(chef)
+            elif direction == constants.DIRECTION_RIGHT and self.map[chef.y][chef.x + 1].content and not isinstance(self.map[chef.y][chef.x + 1].content, Wall):
+                self.map[chef.y][chef.x + 1].content.put_on_chef_held_item(chef)
+            elif direction == constants.DIRECTION_DOWN and self.map[chef.y + 1][chef.x].content and not isinstance(self.map[chef.y + 1][chef.x].content, Wall):
+                self.map[chef.y + 1][chef.x].content.put_on_chef_held_item(chef)
+
+
     def handle_action(self, agent, action):
         chef = self.chefs[int(agent[-1:]) - 1] # convert to base 0
         splitted_action = action.split()
@@ -148,3 +189,7 @@ class World():
             self.__handle_move_action(chef, splitted_action[1], constants.DASH_DISTANCE)
         elif splitted_action[0] == constants.ACTION_USE:
             self.__handle_use_action(chef, splitted_action[1])
+        elif splitted_action[0] == constants.ACTION_PICK:
+            self.__handle_pick_action(chef, splitted_action[1])
+        elif splitted_action[0] == constants.ACTION_PUT:
+            self.__handle_put_action(chef, splitted_action[1])

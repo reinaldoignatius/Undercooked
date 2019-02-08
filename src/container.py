@@ -1,9 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import ABC
+from moveable_object import MoveableObject
 from ingredient import Ingredient
 import constants
 
-class Container(ABC):
-    def __init__(self, id):
+class Container(MoveableObject, ABC):
+    def __init__(self, id, x ,y):
+        super().__init__(x, y)
         self.contents = []
         self.progress = 0
         self.id = id

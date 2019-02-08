@@ -1,8 +1,8 @@
 from container import Container
 
 class CookableContainer(Container):
-    def __init__(self, id):
-        super().__init__(id)
+    def __init__(self, id, x, y):
+        super().__init__(id, x, y)
         self.cooked = False
     
     def put_on_chef_held_item(self, chef):

@@ -1,14 +1,14 @@
+from table import Table
 from bowl import Bowl
 import constants
 
-class Mixer():
+class Mixer(Table):
     def __init__(self):
-        self.content = None
+        super().__init__()
 
     def put_on_chef_held_item(self, chef):
         if isinstance(chef.held_item, Bowl):
-            self.content = chef.held_item
-            chef.held_item = None
+            super().put_on_chef_held_item(chef)
 
     def mix(self):
         if self.content:

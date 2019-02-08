@@ -1,15 +1,11 @@
+from table import Table
 from useable_object import UsableObect
 from ingredient import Ingredient
 import constants
 
-class CuttingBoard(UsableObect):
+class CuttingBoard(Table, UsableObect):
     def __init__(self):
-        self.content = None
-
-    def put_on_chef_held_item(self, chef):
-        if not self.content:
-            self.content = chef.held_item
-            chef.held_item = None
+        super().__init__()
 
     def use(self):
         if isinstance(self.content, Ingredient):
