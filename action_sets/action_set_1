@@ -15,13 +15,43 @@ use down
 use down
 pick down
 dash up
+walk right
 put up
 walk down
 dash right
-dash right
+walk right
 pick right
 dash left
 walk left
 walk left
 walk up
 put up
+walk right
+pick up
+walk left
+put up
+idle
+idle
+idle
+idle
+idle
+idle
+pick up
+dash right
+dash right
+put right
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle

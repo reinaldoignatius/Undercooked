@@ -91,17 +91,17 @@ class World():
             for idx, chef_position in enumerate(position['chefs']):
                 self.map[chef_position['y']][chef_position['x']].content = Chef(
                     self, 
-                    idx + 1, 
-                    chef_position['x'],
-                    chef_position['y']
+                    id=idx + 1, 
+                    x=chef_position['x'],
+                    y=chef_position['y']
                 )
                 self.chefs.append(self.map[chef_position['y']][chef_position['x']].content)
 
             for idx, plate_position in enumerate(position.get('plates')):
                 self.map[plate_position['y']][plate_position['x']].content.content = Plate(
-                    idx + 5,
-                    plate_position['y'],
-                    plate_position['x']
+                    id=idx + 5,
+                    x=plate_position['x'],
+                    y=plate_position['y']
                 )
                 self.plates.append(self.map[plate_position['y']][plate_position['x']].content.content)
 
@@ -206,11 +206,17 @@ class World():
             print()
 
 
+    def print_chefs(self):
+        for chef in self.chefs:
+            print('Id: %d X: %d Y:%d' % (chef.id, chef.x, chef.y))
+
+
     def print_ingredients(self):
         for ingredient in self.ingredients:
             print('Name: %s X: %d Y: %d Progress: %d' % (ingredient.name, ingredient.x, ingredient.y, ingredient.progress))
             for process_done in ingredient.processes_done:
-                print('  %s' % process_done)
+                print('  %s' % process_done, end=' ')
+            print()
 
 
     def print_containers(self):
@@ -218,3 +224,8 @@ class World():
             print('Bowl X: %d Y: %d Progress: %d' % (bowl.x, bowl.y, bowl.progress))
         for cookable_container in self.cookeable_containers:
             print('Cookable container X: %d Y: %d Progress: %d' % (cookable_container.x, cookable_container.y, cookable_container.progress))
+
+
+    def print_plates(self):
+        for plate in self.plates:
+            print('Id: %d X: %d Y:%d' % (plate.id, plate.x, plate.y))

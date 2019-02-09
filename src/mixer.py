@@ -32,4 +32,4 @@ class Mixer(Table):
         if self.content:
             self.content.print()
         else:
-            self.print_static
+            self.print_static()

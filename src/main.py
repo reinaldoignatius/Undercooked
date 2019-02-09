@@ -59,7 +59,9 @@ if __name__ == '__main__':
         undercooked.send('undercooked', undercooked.world.map)
         time.sleep(0.5)
         undercooked.world.print_current_map()
-        undercooked.world.print_containers()
+        undercooked.world.print_chefs()
         undercooked.world.print_ingredients()
+        undercooked.world.print_containers()
+        undercooked.world.print_plates()
 
     ns.shutdown()

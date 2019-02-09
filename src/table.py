@@ -16,6 +16,7 @@ class Table():
     
     def put_off_content(self):
         if self.content:
+            print(self.content)
             content = self.content
             self.content = None
             return content
