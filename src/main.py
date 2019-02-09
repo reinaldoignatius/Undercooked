@@ -5,33 +5,34 @@ from osbrain import run_agent
 
 from world import World
 
+actions = {}
+
 def chef_handler(agent, state):
     agent.log_info('Received game state')
     global actions
     message = {}
     message['sender'] = agent.name
-    message['action'] = actions.pop(0)
+    if actions[agent.name]: 
+        message['action'] = actions[agent.name].pop(0)
+    else:
+        message['action'] = 'do nothing'
     agent.send('undercooked', message, handler=dummy_handler)
 
 def game_handler(agent, message):
     agent.log_info('Execute action: %s %s' % (message['sender'], message['action']))
-    global world
-    world.handle_action(message['sender'], message['action'])
-    world.print_current_map()
+    agent.world.handle_action(message['sender'], message['action'])
 
 def dummy_handler(agent, message):
     pass
 
 if __name__ == '__main__':
 
-    # setup world
-    world = World()
     level_name = 'level_1'
     number_of_players = 4
-    world.load_map(level_name, number_of_players)
-
     with open('action_sets/action_set_1') as infile:
-        actions = [line.rstrip() for line in infile.readlines()]
+        actions['chef_1'] = [line.rstrip() for line in infile.readlines()]
+    with open('action_sets/action_set_4') as infile:
+        actions['chef_4'] = [line.rstrip() for line in infile.readlines()]
 
     ns = run_nameserver()
     undercooked = run_agent('undercooked')
@@ -43,10 +44,22 @@ if __name__ == '__main__':
     addr = undercooked.bind('SYNC_PUB', alias='undercooked', handler=game_handler)
     chef_1.connect(addr, alias='undercooked', handler=chef_handler)
     # chef_2.connect(addr, alias='undercooked', handler=chef_handler)
-    # chef_3.connect(addr, alias='undercooked', handler=get_game_state)
-    # chef_4.connect(addr, alias='undercooked', handler=get_game_state)
+    # chef_3.connect(addr, alias='undercooked', handler=chef_handler)
+    chef_4.connect(addr, alias='undercooked', handler=chef_handler)
 
-    for i in range(len(actions)):
-        undercooked.send('undercooked', world.map)
+    # setup world
+    world = World()
+    world.load_map(level_name, number_of_players)
+    undercooked.world = world
+
+    for i in range(len(actions['chef_1'])):
+        world = undercooked.world
+        world.simulate()
+        undercooked.world = world
+        undercooked.send('undercooked', undercooked.world.map)
+        time.sleep(0.5)
+        undercooked.world.print_current_map()
+        undercooked.world.print_containers()
+        undercooked.world.print_ingredients()
 
     ns.shutdown()

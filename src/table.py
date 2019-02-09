@@ -1,14 +1,17 @@
 from abc import abstractmethod
 
 class Table():
-    def __init__(self):
+    def __init__(self, x, y):
         self.content = None
+        self.x = x
+        self.y = y
 
     def put_on_chef_held_item(self, chef):
         if self.content:
             self.content.put_on_chef_held_item(chef)
         else:
             self.content = chef.held_item
+            self.content.move_to_new_position(x=self.x, y=self.y)
             chef.held_item = None
     
     def put_off_content(self):

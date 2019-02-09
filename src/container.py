@@ -17,6 +17,14 @@ class Container(MoveableObject, ABC):
             chef.held_item.contents = self.contents
             self.contents = new_contents
 
+            for content in self.contents:
+                content.x = self.x
+                content.y = self.y
+
+            for held_content in chef.held_item.contents:
+                held_content.x = chef.x
+                held_content.y = chef.y
+
             new_progress = chef.held_item.progress
             chef.held_item.progress = self.progress
             self.progress = new_progress
@@ -24,8 +32,17 @@ class Container(MoveableObject, ABC):
             # Add ingredients only if not processed except cut and half current progress
             if len(chef.held_item.processes_done) == 1:
                 if chef.held_item.processes_done[0] == constants.PROCESS_CUT:
-                    self.contents.append(Ingredient)
+                    chef.held_item.x = self.x
+                    chef.held_item.y = self.y
+                    self.contents.append(chef.held_item)
+                    chef.held_item = None
                     self.progress /= 2
     
+    def move_to_new_position(self, x, y):
+        super().move_to_new_position(x, y)
+        for content in self.contents:
+            content.x = self.x
+            content.y = self.y
+
     def print(self):
         print(self.id, end='')    

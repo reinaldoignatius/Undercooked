@@ -27,6 +27,8 @@ class World():
         self.plates = []
         self.bowls = []
         self.cookeable_containers = []
+        self.mixers = []
+        self.stoves = []
         self.ingredients = []
         self.return_counter = None
 
@@ -44,7 +46,7 @@ class World():
                             if char == '#':
                                 self.map[row][col].content = Wall()
                             elif char == 'T':
-                                self.map[row][col].content = Table()
+                                self.map[row][col].content = Table(x=col, y=row)
                             elif char == 'W':
                                 self.map[row][col].content = Sink()
                             elif char == 'R':
@@ -55,25 +57,27 @@ class World():
                             elif char == 'G':
                                 self.map[row][col].content = GarbageBin()
                             elif char == 'M':
-                                self.map[row][col].content = Mixer()
+                                self.map[row][col].content = Mixer(x=col, y=row)
                                 self.map[row][col].content.content = Bowl(
                                     id=self.__current_bowl_id,
                                     x=col,
                                     y=row                             
                                 )
+                                self.mixers.append(self.map[row][col].content)
                                 self.bowls.append(self.map[row][col].content.content)
                                 self.__current_bowl_id = ')'
                             elif char == 'O':
-                                self.map[row][col].content = Stove()
+                                self.map[row][col].content = Stove(x=col, y=row)
                                 self.map[row][col].content.content = CookableContainer(
                                     id=self.__current_cookable_container_id,
                                     x=col,
                                     y=row
                                 )
+                                self.stoves.append(self.map[row][col].content)
                                 self.cookeable_containers.append(self.map[row][col].content.content)
                                 self.__current_cookable_container_id = '+'
-                            elif char == 'T':
-                                self.map[row][col].content = CuttingBoard()
+                            elif char == 'K':
+                                self.map[row][col].content = CuttingBoard(x=col, y=row)
                             else:
                                 self.map[row][col].content = IngredientBox(
                                     world=self, 
@@ -102,20 +106,6 @@ class World():
                 self.plates.append(self.map[plate_position['y']][plate_position['x']].content.content)
 
 
-    def print_current_map(self):
-        for row in range(len(self.map)):
-            for col in range(len(self.map[row])):
-                self.map[row][col].print()
-            print()
-
-
-    def print_static_map(self):
-        for row in range(len(self.map)):
-            for col in range(len(self.map[row])):
-                self.map[row][col].print_static()
-            print()
-
-
     def __handle_move_action(self, chef, direction, distance):
         possible_distance = 1
         if direction == constants.DIRECTION_UP and not self.map[chef.y - possible_distance][chef.x].content:
@@ -123,25 +113,25 @@ class World():
                 possible_distance += 1
             self.map[chef.y - possible_distance][chef.x].content = chef
             self.map[chef.y][chef.x].content = None
-            chef.y -= possible_distance
+            chef.move_to_new_position(y=chef.y - possible_distance, x=chef.x)
         elif direction == constants.DIRECTION_LEFT and not self.map[chef.y][chef.x - possible_distance].content:
             while not self.map[chef.y][chef.x - (possible_distance + 1)].content and possible_distance < distance:
                 possible_distance += 1
             self.map[chef.y][chef.x - possible_distance].content = chef
             self.map[chef.y][chef.x].content = None
-            chef.x -= possible_distance
+            chef.move_to_new_position(y=chef.y, x=chef.x - possible_distance)
         elif direction == constants.DIRECTION_RIGHT and not self.map[chef.y][chef.x + possible_distance].content:
             while not self.map[chef.y][chef.x + (possible_distance + 1)].content and possible_distance < distance:
                 possible_distance += 1
             self.map[chef.y][chef.x + possible_distance].content = chef
             self.map[chef.y][chef.x].content = None
-            chef.x += possible_distance
+            chef.move_to_new_position(y=chef.y, x=chef.x + possible_distance)
         elif direction == constants.DIRECTION_DOWN and not self.map[chef.y + possible_distance][chef.x].content:
             while not self.map[chef.y + (possible_distance + 1)][chef.x].content and possible_distance < distance:
                 possible_distance += 1
             self.map[chef.y + possible_distance][chef.x].content = chef
             self.map[chef.y][chef.x].content = None
-            chef.y += possible_distance
+            chef.move_to_new_position(y=chef.y + possible_distance, x=chef.x)
 
 
     def __handle_use_action(self, chef, direction):
@@ -159,13 +149,13 @@ class World():
     def __handle_pick_action(self, chef, direction):
         if not chef.held_item:
             if direction == constants.DIRECTION_UP and isinstance(self.map[chef.y - 1][chef.x].content, Table):
-                chef.held_item = self.map[chef.y - 1][chef.x].content.put_off_content()
+                chef.pick_up(self.map[chef.y - 1][chef.x].content.put_off_content())
             elif direction == constants.DIRECTION_LEFT and isinstance(self.map[chef.y][chef.x - 1].content, Table):
-                chef.held_item = self.map[chef.y][chef.x - 1].content.put_off_content()
+                chef.pick_up(self.map[chef.y][chef.x - 1].content.put_off_content())
             elif direction == constants.DIRECTION_RIGHT and isinstance(self.map[chef.y][chef.x + 1].content, Table):
-                chef.held_item = self.map[chef.y][chef.x + 1].content.put_off_content()
+                chef.pick_up(self.map[chef.y][chef.x + 1].content.put_off_content())
             elif direction == constants.DIRECTION_DOWN and isinstance(self.map[chef.y + 1][chef.x].content, Table):
-                chef.held_item = self.map[chef.y + 1][chef.x].content.put_off_content()
+                chef.pick_up(self.map[chef.y + 1][chef.x].content.put_off_content())
             
 
     def __handle_put_action(self, chef, direction):
@@ -193,3 +183,38 @@ class World():
             self.__handle_pick_action(chef, splitted_action[1])
         elif splitted_action[0] == constants.ACTION_PUT:
             self.__handle_put_action(chef, splitted_action[1])
+
+
+    def simulate(self):
+        for mixer in self.mixers:
+            mixer.mix()
+        for stove in self.stoves:
+            stove.cook()
+
+    
+    def print_current_map(self):
+        for row in range(len(self.map)):
+            for col in range(len(self.map[row])):
+                self.map[row][col].print()
+            print()
+
+
+    def print_static_map(self):
+        for row in range(len(self.map)):
+            for col in range(len(self.map[row])):
+                self.map[row][col].print_static()
+            print()
+
+
+    def print_ingredients(self):
+        for ingredient in self.ingredients:
+            print('Name: %s X: %d Y: %d Progress: %d' % (ingredient.name, ingredient.x, ingredient.y, ingredient.progress))
+            for process_done in ingredient.processes_done:
+                print('  %s' % process_done)
+
+
+    def print_containers(self):
+        for bowl in self.bowls:
+            print('Bowl X: %d Y: %d Progress: %d' % (bowl.x, bowl.y, bowl.progress))
+        for cookable_container in self.cookeable_containers:
+            print('Cookable container X: %d Y: %d Progress: %d' % (cookable_container.x, cookable_container.y, cookable_container.progress))
