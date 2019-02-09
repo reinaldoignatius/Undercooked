@@ -1,0 +1,27 @@
+{
+    "orders": [
+        {
+            "required_ingredients": [
+                {
+                    "name": "a",
+                    "required_processes": [
+                        "cut",
+                        "mixed",
+                        "cooked"
+                    ]
+                },
+                {
+                    "name": "b",
+                    "required_processes": [
+                        "cut",
+                        "mixed",
+                        "cooked"
+                    ]
+                }
+            ],
+            "allocated_time": 200,
+            "maximum_reward": 120
+        }
+    ],
+    "time_between_orders": 81
+}

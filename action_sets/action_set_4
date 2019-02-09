@@ -55,3 +55,7 @@ dash right
 walk right
 walk right
 put up
+dash left
+dash up
+dash right
+put up

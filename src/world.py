@@ -1,4 +1,6 @@
 import json
+import random
+import copy
 
 import constants
 
@@ -18,6 +20,7 @@ from ingredient_box import IngredientBox
 from plate import Plate
 from chef import Chef
 from useable_object import UsableObect
+from order import Order
 
 class World():
 
@@ -30,12 +33,28 @@ class World():
         self.mixers = []
         self.stoves = []
         self.ingredients = []
+        self.possible_orders = []
+        self.current_orders = []
         self.return_counter = None
+        self.obtained_reward = 0
 
+        self.__time_between_orders = 0
+        self.__time_until_next_order = 0
         self.__current_bowl_id = '('
         self.__current_cookable_container_id = '-'
 
-    def load_map(self, level_name, number_of_players):
+
+    def __create_order(self):
+        print(len(self.possible_orders))
+        selected_order = self.possible_orders[random.randint(0, len(self.possible_orders) - 1)]
+        self.current_orders.append(Order(
+            required_ingredients=copy.deepcopy(selected_order['required_ingredients']), 
+            allocated_time=selected_order['allocated_time'],
+            maximum_reward=selected_order['maximum_reward']
+        ))
+
+
+    def load_level(self, level_name, number_of_players):
         with open('levels/%s/.map' % level_name) as infile:
             for row, line in enumerate(infile.readlines()):
                 self.map.append([])
@@ -104,6 +123,14 @@ class World():
                     y=plate_position['y']
                 )
                 self.plates.append(self.map[plate_position['y']][plate_position['x']].content.content)
+        
+        with open('levels/%s/orders.json' % level_name) as infile:
+            order_dict = json.load(infile)
+            self.possible_orders = [order for order in order_dict['orders']]
+            self.__time_between_orders = order_dict['time_between_orders']
+            self.__time_until_next_order = self.__time_between_orders / 3
+
+        self.__create_order()
 
 
     def __handle_move_action(self, chef, direction, distance):
@@ -190,13 +217,49 @@ class World():
             mixer.mix()
         for stove in self.stoves:
             stove.cook()
+        for current_order in self.current_orders:
+            current_order.remaining_time -= 1
+            if current_order.remaining_time == 0:
+                self.obtained_reward -= constants.PENALTY
+                current_order.remaining_time = current_order.allocated_time
+
+        self.__time_until_next_order -= 1
+        if self.__time_until_next_order <= 0:
+            self.__create_order()
+            self.__time_until_next_order = self.__time_between_orders
 
     
+    def submit(self, plate):
+        match_idx = -1
+        for idx, current_order in enumerate(self.current_orders):
+            if current_order.match(plate.contents):
+                match_idx = idx
+                remaining_time_percentage = current_order.remaining_time / current_order.allocated_time
+                if remaining_time_percentage >= 0.67:
+                    self.obtained_reward += current_order.maximum_reward
+                elif remaining_time_percentage >= 0.33:
+                    self.obtained_reward += 2 / 3 * current_order.maximum_reward
+                else:
+                    self.obtained_reward += current_order.maximum_reward / 3
+        if match_idx != -1:
+            self.current_orders.pop(match_idx)
+
     def print_current_map(self):
         for row in range(len(self.map)):
             for col in range(len(self.map[row])):
                 self.map[row][col].print()
             print()
+
+    
+    def print_current_orders(self):
+        for current_order in self.current_orders:
+            print('Time remaining:', current_order.remaining_time)
+            print('Required ingredients:')
+            for required_ingredient in current_order.required_ingredients:
+                print('Name: %s Required processes:' % (required_ingredient['name']), end=' ')
+                for required_process in required_ingredient['required_processes']:
+                    print(required_process, end=' ')
+                print()        
 
 
     def print_static_map(self):
@@ -228,4 +291,4 @@ class World():
 
     def print_plates(self):
         for plate in self.plates:
-            print('Id: %d X: %d Y:%d' % (plate.id, plate.x, plate.y))
+            print('Id: %d X: %d Y: %d Dirty: %s' % (plate.id, plate.x, plate.y, plate.is_dirty))

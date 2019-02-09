@@ -10,6 +10,8 @@ class SubmissionCounter():
             chef.held_item = None
             if not plate.is_dirty:
                 self.__world.submit(plate)
+                plate.is_dirty = True
+                plate.contents.clear()
 
     def print_static(self):
         print('S', end="")

@@ -1,3 +1,4 @@
+import os
 import time
 
 from osbrain import run_nameserver
@@ -49,16 +50,19 @@ if __name__ == '__main__':
 
     # setup world
     world = World()
-    world.load_map(level_name, number_of_players)
+    world.load_level(level_name, number_of_players)
     undercooked.world = world
 
     for i in range(len(actions['chef_1'])):
+        os.system('clear')
         world = undercooked.world
         world.simulate()
         undercooked.world = world
         undercooked.send('undercooked', undercooked.world.map)
-        time.sleep(0.5)
+        time.sleep(0.1)
         undercooked.world.print_current_map()
+        undercooked.world.print_current_orders()
+        print('Obtained reward:', undercooked.world.obtained_reward)
         undercooked.world.print_chefs()
         undercooked.world.print_ingredients()
         undercooked.world.print_containers()
