@@ -27,9 +27,3 @@ class Stove(Table):
 
     def print_static(self):
         print('O', end='')
-
-    def print(self):
-        if self.content:
-            self.content.print()
-        else:
-            self.print_static()

@@ -16,7 +16,6 @@ class Table():
     
     def put_off_content(self):
         if self.content:
-            print(self.content)
             content = self.content
             self.content = None
             return content
@@ -25,7 +24,6 @@ class Table():
     def print_static(self):
         print('T', end='')
 
-    @abstractmethod
     def print(self):
         if self.content:
             self.content.print()

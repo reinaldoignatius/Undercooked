@@ -54,7 +54,7 @@ if __name__ == '__main__':
     undercooked.world = world
 
     for i in range(len(actions['chef_1'])):
-        os.system('clear')
+        # os.system('clear')
         world = undercooked.world
         world.simulate()
         undercooked.world = world
@@ -66,6 +66,7 @@ if __name__ == '__main__':
         undercooked.world.print_chefs()
         undercooked.world.print_ingredients()
         undercooked.world.print_containers()
+        undercooked.world.print_sinks()
         undercooked.world.print_plates()
 
     ns.shutdown()

@@ -15,12 +15,5 @@ class CuttingBoard(Table, UsableObect):
                     if self.content.progress >= constants.CUT_TICKS:
                         self.content.processes_done.append(constants.PROCESS_CUT)
                     
-
     def print_static(self):
         print('K', end='')
-
-    def print(self):
-        if self.content:
-            self.content.print()
-        else:
-            self.print_static()

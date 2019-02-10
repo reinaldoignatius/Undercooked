@@ -32,6 +32,7 @@ class World():
         self.cookeable_containers = []
         self.mixers = []
         self.stoves = []
+        self.sinks = []
         self.ingredients = []
         self.possible_orders = []
         self.current_orders = []
@@ -67,9 +68,10 @@ class World():
                             elif char == 'T':
                                 self.map[row][col].content = Table(x=col, y=row)
                             elif char == 'W':
-                                self.map[row][col].content = Sink()
+                                self.map[row][col].content = Sink(x=col, y=row)
+                                self.sinks.append(self.map[row][col].content)
                             elif char == 'R':
-                                self.return_counter = ReturnCounter()
+                                self.return_counter = ReturnCounter(x=col, y=row)
                                 self.map[row][col].content = self.return_counter
                             elif char == 'S':
                                 self.map[row][col].content = SubmissionCounter(self)
@@ -222,6 +224,11 @@ class World():
             if current_order.remaining_time == 0:
                 self.obtained_reward -= constants.PENALTY
                 current_order.remaining_time = current_order.allocated_time
+        for plate in self.plates:
+            if plate.is_dirty and plate.time_until_respawn > 0:
+                plate.time_until_respawn -= 1
+                if plate.time_until_respawn == 0:
+                    self.return_counter.add_dirty_plate(plate)
 
         self.__time_until_next_order -= 1
         if self.__time_until_next_order <= 0:
@@ -288,6 +295,9 @@ class World():
         for cookable_container in self.cookeable_containers:
             print('Cookable container X: %d Y: %d Progress: %d' % (cookable_container.x, cookable_container.y, cookable_container.progress))
 
+    def print_sinks(self):
+        for sink in self.sinks:
+            print('Progress: %d Dirty Plate(s): %d Clean Plate(s): %d' % (sink.progress, len(sink.dirty_plates), len(sink.clean_plates)))
 
     def print_plates(self):
         for plate in self.plates:

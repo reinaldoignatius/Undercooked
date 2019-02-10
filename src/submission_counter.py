@@ -1,3 +1,5 @@
+import constants
+
 from plate import Plate
 
 class SubmissionCounter():
@@ -10,7 +12,12 @@ class SubmissionCounter():
             chef.held_item = None
             if not plate.is_dirty:
                 self.__world.submit(plate)
+                plate.x = -1
+                plate.y = -1
                 plate.is_dirty = True
+                plate.time_until_respawn = constants.PLATE_RESPAWN_TIME
+                for content in plate.contents:
+                    self.__world.ingredients.remove(content)
                 plate.contents.clear()
 
     def print_static(self):

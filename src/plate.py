@@ -9,6 +9,7 @@ class Plate(MoveableObject):
         self.id = id
         self.contents = []
         self.is_dirty = False
+        self.time_until_respawn = 0
 
     def put_on_chef_held_item(self, chef):
         if isinstance(chef.held_item, Ingredient):
