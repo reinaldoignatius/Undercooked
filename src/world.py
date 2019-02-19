@@ -43,16 +43,18 @@ class World():
         self.__time_until_next_order = 0
         self.__current_bowl_id = '('
         self.__current_cookable_container_id = '-'
+        self.__order_count = 0
 
 
     def __create_order(self):
-        print(len(self.possible_orders))
         selected_order = self.possible_orders[random.randint(0, len(self.possible_orders) - 1)]
         self.current_orders.append(Order(
+            id = self.__order_count,
             required_ingredients=copy.deepcopy(selected_order['required_ingredients']), 
             allocated_time=selected_order['allocated_time'],
             maximum_reward=selected_order['maximum_reward']
         ))
+        self.__order_count += 1
 
 
     def load_level(self, level_name, number_of_players):

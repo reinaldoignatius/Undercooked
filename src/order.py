@@ -1,5 +1,6 @@
 class Order:
-    def __init__(self, required_ingredients, allocated_time, maximum_reward):
+    def __init__(self, id, required_ingredients, allocated_time, maximum_reward):
+        self.id = id
         self.required_ingredients = required_ingredients
         self.remaining_time = allocated_time
         self.allocated_time = allocated_time
