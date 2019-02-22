@@ -38,6 +38,7 @@ class World():
         self.current_orders = []
         self.return_counter = None
         self.obtained_reward = 0
+        self.remaining_time = constants.TIME_GIVEN
 
         self.__time_between_orders = 0
         self.__time_until_next_order = 0

@@ -4,8 +4,11 @@ import time
 from osbrain import run_nameserver
 from osbrain import run_agent
 
+import tensorflow as tf
+
 from world import World
 from blackboard_system import BlackboardSystem
+from agent.agent import Agent
 
 actions = {}
 
@@ -82,29 +85,40 @@ if __name__ == '__main__':
     # chef_3.connect(blackboard_addr, alias='blackboard')
     chef_4.connect(blackboard_addr, alias='blackboard')
     
-    # setup Undercooked world
+    # Setup Undercooked world
     world = World()
     world.load_level(level_name, number_of_chefs)
     undercooked.world = world
 
-    # setup BlackBoard system
+    # Setup BlackBoard system
     blackboard_system = BlackboardSystem(number_of_chefs)
     blackboard.blackboard_system = blackboard_system
 
-    for i in range(len(actions['chef_1'])):
+    # Setup Chef agents
+    graph = tf.get_default_graph()
+    chef_1.agent = Agent('chef_1')
+    chef_1.agent.build_model(graph)
+    # chef_2.agent = Agent('chef_2')
+    # chef_2.agent.build_model(graph)
+    # chef_3.agent = Agent('chef_3')
+    # chef_3.agent.build_model(graph)
+    # chef_4.agent = Agent('chef_4')
+    # chef_4.agent.build_model(graph)
+
+    while world.remaining_time > 0:
         # os.system('clear')
         world = undercooked.world
         world.simulate()
         undercooked.world = world
         undercooked.send('undercooked', undercooked.world.map)
         time.sleep(1)
-        # undercooked.world.print_current_map()
-        # undercooked.world.print_current_orders()
-        # print('Obtained reward:', undercooked.world.obtained_reward)
-        # undercooked.world.print_chefs()
-        # undercooked.world.print_ingredients()
-        # undercooked.world.print_containers()
-        # undercooked.world.print_sinks()
-        # undercooked.world.print_plates()
+        undercooked.world.print_current_map()
+        undercooked.world.print_current_orders()
+        print('Obtained reward:', undercooked.world.obtained_reward)
+        undercooked.world.print_chefs()
+        undercooked.world.print_ingredients()
+        undercooked.world.print_containers()
+        undercooked.world.print_sinks()
+        undercooked.world.print_plates()
 
-    ns.shutdown()
+    # ns.shutdown()
