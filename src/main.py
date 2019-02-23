@@ -15,14 +15,15 @@ actions = {}
 MESSAGE_TYPE_READ = 'read'
 MESSAGE_TYPE_WRITE = 'write'
 
-def chef_handler(agent, state):
-    agent.log_info('Received game state, requesting blackboard writings')
+def chef_handler(agent, game_info):
+    agent.log_info('Received game info, requesting blackboard writings')
     blackboard_message = {}
     blackboard_message['sender'] = agent.name
     blackboard_message['type'] = MESSAGE_TYPE_READ
     agent.send('blackboard', blackboard_message)
     blackboard_recent_writings = agent.recv('blackboard')
-    agent.log_info(blackboard_recent_writings)
+
+    agent.agent.act(game_info, blackboard_recent_writings)
 
     global actions
     undercooked_message = {}
@@ -110,15 +111,7 @@ if __name__ == '__main__':
         world = undercooked.world
         world.simulate()
         undercooked.world = world
-        undercooked.send('undercooked', undercooked.world.map)
+        undercooked.send('undercooked', undercooked.world.get_all_game_info())
         time.sleep(1)
-        undercooked.world.print_current_map()
-        undercooked.world.print_current_orders()
-        print('Obtained reward:', undercooked.world.obtained_reward)
-        undercooked.world.print_chefs()
-        undercooked.world.print_ingredients()
-        undercooked.world.print_containers()
-        undercooked.world.print_sinks()
-        undercooked.world.print_plates()
 
     # ns.shutdown()

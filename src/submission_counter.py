@@ -11,7 +11,7 @@ class SubmissionCounter():
             plate = chef.held_item
             chef.held_item = None
             if not plate.is_dirty:
-                self.__world.submit(plate)
+                self.__world.submit_plate(plate)
                 plate.x = -1
                 plate.y = -1
                 plate.is_dirty = True

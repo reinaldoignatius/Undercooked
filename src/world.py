@@ -28,11 +28,13 @@ class World():
         self.map = []
         self.chefs = []
         self.plates = []
+        self.tables = []
         self.bowls = []
-        self.cookeable_containers = []
+        self.cookable_containers = []
         self.mixers = []
         self.stoves = []
-        self.sinks = []
+        self.sink = None
+        self.cutting_boards = []
         self.ingredients = []
         self.possible_orders = []
         self.current_orders = []
@@ -50,7 +52,8 @@ class World():
     def __create_order(self):
         selected_order = self.possible_orders[random.randint(0, len(self.possible_orders) - 1)]
         self.current_orders.append(Order(
-            id = self.__order_count,
+            id=self.__order_count,
+            name=selected_order['name'],
             required_ingredients=copy.deepcopy(selected_order['required_ingredients']), 
             allocated_time=selected_order['allocated_time'],
             maximum_reward=selected_order['maximum_reward']
@@ -70,9 +73,10 @@ class World():
                                 self.map[row][col].content = Wall()
                             elif char == 'T':
                                 self.map[row][col].content = Table(x=col, y=row)
+                                self.tables.append(self.map[row][col].content)
                             elif char == 'W':
                                 self.map[row][col].content = Sink(x=col, y=row)
-                                self.sinks.append(self.map[row][col].content)
+                                self.sink = self.map[row][col].content
                             elif char == 'R':
                                 self.return_counter = ReturnCounter(x=col, y=row)
                                 self.map[row][col].content = self.return_counter
@@ -98,10 +102,11 @@ class World():
                                     y=row
                                 )
                                 self.stoves.append(self.map[row][col].content)
-                                self.cookeable_containers.append(self.map[row][col].content.content)
+                                self.cookable_containers.append(self.map[row][col].content.content)
                                 self.__current_cookable_container_id = '+'
                             elif char == 'K':
                                 self.map[row][col].content = CuttingBoard(x=col, y=row)
+                                self.cutting_boards.append(self.map[row][col].content)
                             else:
                                 self.map[row][col].content = IngredientBox(
                                     world=self, 
@@ -239,7 +244,7 @@ class World():
             self.__time_until_next_order = self.__time_between_orders
 
     
-    def submit(self, plate):
+    def submit_plate(self, plate):
         match_idx = -1
         for idx, current_order in enumerate(self.current_orders):
             if current_order.match(plate.contents):
@@ -254,13 +259,46 @@ class World():
         if match_idx != -1:
             self.current_orders.pop(match_idx)
 
+
+    def get_all_game_info(self):
+        game_info = {}
+        
+        game_info['current_map'] = self.map
+        game_info['obtained_reward'] = self.obtained_reward
+        game_info['remaining_time'] = self.remaining_time
+        game_info['current_orders'] = self.current_orders
+        game_info['tables'] = self.tables
+        game_info['bowls'] = self.bowls
+        game_info['mixers'] = self.mixers
+        game_info['cookable_containers'] = self.cookable_containers
+        game_info['stoves'] = self.stoves
+        game_info['cutting_boards'] = self.cutting_boards
+        game_info['ingredients'] = self.ingredients
+        game_info['plates'] = self.plates
+        game_info['return_counter'] = self.return_counter
+        game_info['sink'] = self.sink
+
+        return game_info
+
+
     def print_current_map(self):
         for row in range(len(self.map)):
             for col in range(len(self.map[row])):
                 self.map[row][col].print()
             print()
 
-    
+
+    def print_static_map(self):
+        for row in range(len(self.map)):
+            for col in range(len(self.map[row])):
+                self.map[row][col].print_static()
+            print()
+
+
+    def print_obtained_reward(self):
+        print('Obtained reward:', self.obtained_reward)
+
+
     def print_current_orders(self):
         for current_order in self.current_orders:
             print('Time remaining:', current_order.remaining_time)
@@ -270,13 +308,6 @@ class World():
                 for required_process in required_ingredient['required_processes']:
                     print(required_process, end=' ')
                 print()        
-
-
-    def print_static_map(self):
-        for row in range(len(self.map)):
-            for col in range(len(self.map[row])):
-                self.map[row][col].print_static()
-            print()
 
 
     def print_chefs(self):
@@ -295,13 +326,25 @@ class World():
     def print_containers(self):
         for bowl in self.bowls:
             print('Bowl X: %d Y: %d Progress: %d' % (bowl.x, bowl.y, bowl.progress))
-        for cookable_container in self.cookeable_containers:
+        for cookable_container in self.cookable_containers:
             print('Cookable container X: %d Y: %d Progress: %d' % (cookable_container.x, cookable_container.y, cookable_container.progress))
 
+
     def print_sinks(self):
-        for sink in self.sinks:
-            print('Progress: %d Dirty Plate(s): %d Clean Plate(s): %d' % (sink.progress, len(sink.dirty_plates), len(sink.clean_plates)))
+        print('Progress: %d Dirty Plate(s): %d Clean Plate(s): %d' % (self.sink.progress, len(self.sink.dirty_plates), len(self.sink.clean_plates)))
+
 
     def print_plates(self):
         for plate in self.plates:
             print('Id: %d X: %d Y: %d Dirty: %s' % (plate.id, plate.x, plate.y, plate.is_dirty))
+
+    
+    def print_all_game_info(self):
+        self.print_current_map()
+        self.print_current_orders()
+        self.print_obtained_reward()
+        self.print_chefs()
+        self.print_ingredients()
+        self.print_containers()
+        self.print_sinks()
+        self.print_plates()
