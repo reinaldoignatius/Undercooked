@@ -9,6 +9,7 @@ import tensorflow as tf
 from world import World
 from blackboard_system import BlackboardSystem
 from agent.agent import Agent
+from agent import constants as agent_constants
 
 actions = {}
 
@@ -23,7 +24,7 @@ def chef_handler(agent, game_info):
     agent.send('blackboard', blackboard_message)
     blackboard_recent_writings = agent.recv('blackboard')
 
-    agent.agent.act(game_info, blackboard_recent_writings)
+    action = agent.agent.act(game_info, blackboard_recent_writings)
 
     global actions
     undercooked_message = {}
@@ -97,14 +98,14 @@ if __name__ == '__main__':
 
     # Setup Chef agents
     graph = tf.get_default_graph()
-    chef_1.agent = Agent('chef_1')
+    chef_1.agent = Agent('chef_1', agent_constants.SIDE_LEFT)
     chef_1.agent.build_model(graph)
-    # chef_2.agent = Agent('chef_2')
+    # chef_2.agent = Agent('chef_2', agent_constants.SIDE_RIGHT)
     # chef_2.agent.build_model(graph)
-    # chef_3.agent = Agent('chef_3')
+    # chef_3.agent = Agent('chef_3', agent_constants.SIDE_LEFT)
     # chef_3.agent.build_model(graph)
-    # chef_4.agent = Agent('chef_4')
-    # chef_4.agent.build_model(graph)
+    chef_4.agent = Agent('chef_4', agent_constants.SIDE_RIGHT)
+    chef_4.agent.build_model(graph)
 
     while world.remaining_time > 0:
         # os.system('clear')
