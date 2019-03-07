@@ -31,10 +31,10 @@ class Agent():
                 column 1: is a
                 column 2: is b
             """
-            if current_order.name == 'a':
+            if current_order.name == game_constants.INGREDIENT_A_NAME:
                 state.append(1)
                 state.append(0)
-            elif current_order.name == 'b':
+            elif current_order.name == game_constants.INGREDIENT_B_NAME:
                 state.append(0)
                 state.append(1)
             state.append(current_order.remaining_time)
@@ -54,11 +54,13 @@ class Agent():
                 column 1: contain 'a'
                 column 2: contain 'c'
             """
-            if filter(lambda ingredient: ingredient.name == 'a', bowl.contents):
+            if filter(lambda ingredient: ingredient.name == game_constants.INGREDIENT_A_NAME,
+                    bowl.contents):
                 state.append(1)
             else:
                 state.append(0)
-            if filter(lambda ingredient: ingredient.name == 'c', bowl.contents):
+            if filter(lambda ingredient: ingredient.name == game_constants.INGREDIENT_C_NAME,
+                    bowl.contents):
                 state.append(1)
             else:
                 state.append(0)
@@ -69,7 +71,8 @@ class Agent():
                 column 3: on side table
                 all 0 means being carried
             """
-            if filter(lambda mixer: mixer.x == bowl.x and mixer.y == bowl.y, game_info['mixers']):
+            if filter(lambda mixer: mixer.x == bowl.x and mixer.y == bowl.y,
+                    game_info['mixers']):
                 state.append(1)
                 state.append(0)
                 state.append(0)
@@ -77,7 +80,8 @@ class Agent():
                 state.append(0)
                 state.append(1)
                 state.append(0)
-            elif filter(lambda table: table.x == bowl.x and table.y == bowl.y, game_info['tables']):
+            elif filter(lambda table: table.x == bowl.x and table.y == bowl.y,
+                    game_info['tables']):
                 state.append(0)
                 state.append(0)
                 state.append(1)
@@ -99,11 +103,13 @@ class Agent():
                 column 1: contain 'a'
                 column 2: contain 'b'
             """
-            if filter(lambda ingredient: ingredient.name == 'a', bowl.contents):
+            if filter(lambda ingredient: ingredient.name == game_constants.INGREDIENT_A_NAME,
+                    bowl.contents):
                 state.append(1)
             else:
                 state.append(0)
-            if filter(lambda ingredient: ingredient.name == 'b', bowl.contents):
+            if filter(lambda ingredient: ingredient.name == game_constants.INGREDIENT_B_NAME,
+                    bowl.contents):
                 state.append(1)
             else:
                 state.append(0)
@@ -137,11 +143,13 @@ class Agent():
                 column 1: contain 'a'
                 column 2: contain 'b'
             """
-            if filter(lambda ingredient: ingredient.name == 'a', plate.contents):
+            if filter(lambda ingredient: ingredient.name == game_constants.INGREDIENT_A_NAME,
+                    plate.contents):
                 state.append(1)
             else:
                 state.append(0)
-            if filter(lambda ingredient: ingredient.name == 'b', plate.contents):
+            if filter(lambda ingredient: ingredient.name == game_constants.INGREDIENT_B_NAME,
+                    plate.contents):
                 state.append(1)
             else:
                 state.append(0)
@@ -209,9 +217,9 @@ class Agent():
             column 17: being carried on right side
             """
             to_be_modified_state_idx = 0
-            if ingredient.name != 'c':
+            if ingredient.name != game_constants.INGREDIENT_C_NAME:
                 # Check if name is 'a' or 'b'
-                if ingredient.name == 'b':
+                if ingredient.name == game_constants.INGREDIENT_B_NAME:
                     to_be_modified_state_idx += 6
                 # Check if cut
                 if game_constants.PROCESS_CUT in ingredient.processes_done:
@@ -225,7 +233,7 @@ class Agent():
                     to_be_modified_state_idx += 1
                 else:
                     to_be_modified_state_idx += 2
-            elif ingredient.name == 'c':
+            elif ingredient.name == game_constants.INGREDIENT_C_NAME:
                 # Check if on table
                 if filter(lambda table: table.x == ingredient.x and 
                     table.y == ingredient.y, game_info['tables']):
@@ -284,9 +292,29 @@ class Agent():
                     current[0] + 1 == destination.x and current[1] + 1 == destination.y:
                 while current in came_from:
                     current = came_from[current]
-                return (len(came_from), (current.x - origin.x, current.y - origin.y))
-            
+                path = { 'distance': len(came_from) }
 
+                x_direction = current.x - origin.x
+                y_direction = current.y - origin.y
+                if x_direction == -1 and y_direction == -1:
+                    path['direction'] = game_constants.DIRECTION_UPPER_LEFT
+                elif x_direction == 0 and y_direction == -1:
+                    path['direction'] = game_constants.DIRECTION_UP
+                elif x_direction == 1 and y_direction == -1:
+                    path['direction'] = game_constants.DIRECTION_UPPER_RIGHT
+                elif x_direction == -1 and y_direction == 0:
+                    path['direction'] == game_constants.DIRECTION_LEFT
+                elif x_direction == 1 and y_direction == 0:
+                    path['direction'] == game_constants.DIRECTION_RIGHT
+                elif x_direction == -1 and y_direction == 1:
+                    path['direction'] == game_constants.DIRECTION_LOWER_LEFT
+                elif x_direction == 0 and y_direction == 1:
+                    path['direction'] == game_constants.DIRECTION_DOWN
+                elif x_direction == 1 and y_direction == 1:
+                    path['direction'] == game_constants.DIRECTION_LOWER_RIGHT
+                
+                return path
+            
             open_set.remove(current)
             closed_set.remove(current)
 
@@ -320,24 +348,86 @@ class Agent():
                             abs(destination.y - neighbor[1])
     
 
-    def __find_closest_position_from_origin(self, origin, destinations):
-        pass
-
-
-    def __find_ingredient_in_game(self, ingredients, ingredient_name, is_cut):
-        ingredients = filter(lambda ingredient: ingredient.name == ingredient_name and
-            filter(lambda process_donce: process_done == game_constants.PROCESS_CUT, 
-                ingredient.processes_done) if is_cut else True)
+    def __get_closest_path(self, map, origin, destinations):
+        chosen_path = None
+        for destination in destinations:
+            if not chosen_path:
+                chosen_path = self.__a_star(map, origin, destination)
+            else:
+                candidate_path = self.__a_star(map, origin, destination)
+                if candidate_path['distance'] < chosen_path['distance']:
+                    chosen_path = candidate_path
+        return chosen_path
 
 
     def __translate_action_to_game_action(self, action_idx, game_info):
+        own_chef = game_info['chefs'][int(self.__name[-1:]) - 1]
+
+        not_held_ingredients = game_info['ingredients']
+        for chef in game_info['chefs']:
+            not_held_ingredients = filter(
+                lambda ingredient: ingredient.x == chef.x and ingredient.y == chef.y,
+                not_held_ingredients
+            )
+
+        a_ingredients = filter(
+            lambda ingredient: ingredient.name == game_constants.INGREDIENT_A_NAME, 
+            not_held_ingredients
+        )
+        b_ingredients = filter(
+            lambda ingredient: ingredient.name == game_constants.INGREDIENT_B_NAME,
+            not_held_ingredients
+        )
+        c_ingredients = filter(
+            lambda ingredient: ingredient.name == game_constants.INGREDIENT_C_NAME,
+            not_held_ingredients
+        )
+
+        uncut_a_ingredients = filter(
+            lambda a_ingredient: not a_ingredient.processes_done, a_ingredients)
+        uncut_b_ingredients = filter(
+            lambda b_ingredient: not b_ingredient.processes_done, b_ingredients)
+
+        uncut_a_ingredients_on_cutting_board = []
+        uncut_b_ingredients_on_cutting_board = []
+        for cutting_board in game_info['cutting_boards']:        
+            uncut_a_ingredients_on_cutting_board += filter(
+                lambda uncut_a: uncut_a.x == cutting_board.x and uncut_a.y == cutting_board.y,
+                uncut_a_ingredients
+            )
+            uncut_a_ingredients_on_cutting_board += filter(
+                lambda uncut_b: uncut_b.x == cutting_board.x and uncut_b.y == cutting_board.y,
+                uncut_b_ingredients
+            )
+
+        uncut_a_ingredients_not_on_cutting_board = [a for a in uncut_a_ingredients \
+            if a not in uncut_a_ingredients_on_cutting_board]
+        uncut_b_ingredients_not_on_cutting_board = [b for b in uncut_b_ingredients \
+            if b not in uncut_b_ingredients_on_cutting_board]
+
         if self.__side == constants.SIDE_LEFT:
             if action_idx == 0: # Cut a
-                ingredients = self.__find_ingredient_in_game(
-                    game_info['ingredients'], 
-                    'a', 
-                    False
-                )
+                if not own_chef.held_item:
+                    closest_path = self.__get_closest_path(
+                        game_info['map'],
+                        (own_chef.x, own_chef.y),
+                        list(map(
+                            lambda a: (a.x, a.y), 
+                            uncut_a_ingredients_on_cutting_board if \
+                                uncut_a_ingredients_on_cutting_board else \
+                                uncut_a_ingredients_not_on_cutting_board
+                        ))
+                    )
+                    if closest_path['distance'] == 0:
+                        return "%s %s" % (
+                            game_constants.ACTION_USE, 
+                            closest_path['direction']
+                        )
+                    return "%s %s" % (
+                        game_constants.ACTION_WALK,
+                        closest_path['direction']
+                    )
+            elif action_idx == 1: # Mix a and c
         else:
             pass
 

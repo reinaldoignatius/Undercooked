@@ -102,7 +102,8 @@ class World():
                                     y=row
                                 )
                                 self.stoves.append(self.map[row][col].content)
-                                self.cookable_containers.append(self.map[row][col].content.content)
+                                self.cookable_containers.append(
+                                    self.map[row][col].content.content)
                                 self.__current_cookable_container_id = '+'
                             elif char == 'K':
                                 self.map[row][col].content = CuttingBoard(x=col, y=row)
@@ -132,7 +133,8 @@ class World():
                     x=plate_position['x'],
                     y=plate_position['y']
                 )
-                self.plates.append(self.map[plate_position['y']][plate_position['x']].content.content)
+                self.plates.append(
+                    self.map[plate_position['y']][plate_position['x']].content.content)
         
         with open('levels/%s/orders.json' % level_name) as infile:
             order_dict = json.load(infile)
@@ -145,66 +147,210 @@ class World():
 
     def __handle_move_action(self, chef, direction, distance):
         possible_distance = 1
-        if direction == constants.DIRECTION_UP and not self.map[chef.y - possible_distance][chef.x].content:
-            while not self.map[chef.y - (possible_distance + 1)][chef.x].content and possible_distance < distance:
+        if direction == constants.DIRECTION_UPPER_LEFT and \
+                not self.map[chef.y - possible_distance][chef.x - possible_distance].content:
+            while not self.map[chef.y - (possible_distance + 1)] \
+                    [chef.x - (possible_distance + 1)].content and \
+                    possible_distance < distance:
+                possible_distance += 1\
+            self.map[chef.y - possible_distance][chef.x - possible_distance].content = chef
+            self.map[chef.y][chef.x].content = None
+            chef.move_to_new_position(
+                y=chef.y - possible_distance, 
+                x=chef.x - possible_distance
+            )
+        elif direction == constants.DIRECTION_UP and \
+                not self.map[chef.y - possible_distance][chef.x].content:
+            while not self.map[chef.y - (possible_distance + 1)][chef.x].content and \
+                    possible_distance < distance:
                 possible_distance += 1
             self.map[chef.y - possible_distance][chef.x].content = chef
             self.map[chef.y][chef.x].content = None
             chef.move_to_new_position(y=chef.y - possible_distance, x=chef.x)
-        elif direction == constants.DIRECTION_LEFT and not self.map[chef.y][chef.x - possible_distance].content:
-            while not self.map[chef.y][chef.x - (possible_distance + 1)].content and possible_distance < distance:
+        elif direction == constants.DIRECTION_UPPER_RIGHT and \
+                not self.map[chef.y - possible_distance][chef.x + possible_distance].content:
+            while not self.map[chef.y - (possible_distance + 1)] \
+                    [chef.x + (possible_distance + 1)].content and \
+                    possible_distance < distance:
+                possible_distance += 1\
+            self.map[chef.y - possible_distance][chef.x + possible_distance].content = chef
+            self.map[chef.y][chef.x].content = None
+            chef.move_to_new_position(
+                y=chef.y - possible_distance, 
+                x=chef.x + possible_distance
+            )
+        elif direction == constants.DIRECTION_LEFT and \
+                not self.map[chef.y][chef.x - possible_distance].content:
+            while not self.map[chef.y][chef.x - (possible_distance + 1)].content and \
+                    possible_distance < distance:
                 possible_distance += 1
             self.map[chef.y][chef.x - possible_distance].content = chef
             self.map[chef.y][chef.x].content = None
             chef.move_to_new_position(y=chef.y, x=chef.x - possible_distance)
-        elif direction == constants.DIRECTION_RIGHT and not self.map[chef.y][chef.x + possible_distance].content:
-            while not self.map[chef.y][chef.x + (possible_distance + 1)].content and possible_distance < distance:
+        elif direction == constants.DIRECTION_RIGHT and \
+                not self.map[chef.y][chef.x + possible_distance].content:
+            while not self.map[chef.y][chef.x + (possible_distance + 1)].content and \
+                    possible_distance < distance:
                 possible_distance += 1
             self.map[chef.y][chef.x + possible_distance].content = chef
             self.map[chef.y][chef.x].content = None
             chef.move_to_new_position(y=chef.y, x=chef.x + possible_distance)
-        elif direction == constants.DIRECTION_DOWN and not self.map[chef.y + possible_distance][chef.x].content:
-            while not self.map[chef.y + (possible_distance + 1)][chef.x].content and possible_distance < distance:
+        elif direction == constants.DIRECTION_LOWER_LEFT and \
+                not self.map[chef.y + possible_distance][chef.x - possible_distance].content:
+            while not self.map[chef.y + (possible_distance + 1)] \
+                    [chef.x - (possible_distance + 1)].content and \
+                    possible_distance < distance:
+                possible_distance += 1\
+            self.map[chef.y + possible_distance][chef.x - possible_distance].content = chef
+            self.map[chef.y][chef.x].content = None
+            chef.move_to_new_position(
+                y=chef.y + possible_distance, 
+                x=chef.x - possible_distance
+            )
+        elif direction == constants.DIRECTION_DOWN and \
+                not self.map[chef.y + possible_distance][chef.x].content:
+            while not self.map[chef.y + (possible_distance + 1)][chef.x].content and \
+                    possible_distance < distance:
                 possible_distance += 1
             self.map[chef.y + possible_distance][chef.x].content = chef
             self.map[chef.y][chef.x].content = None
             chef.move_to_new_position(y=chef.y + possible_distance, x=chef.x)
+        elif direction == constants.DIRECTION_LOWER_RIGHT and \
+                not self.map[chef.y + possible_distance][chef.x + possible_distance].content:
+            while not self.map[chef.y + (possible_distance + 1)] \
+                    [chef.x + (possible_distance + 1)].content and \
+                    possible_distance < distance:
+                possible_distance += 1\
+            self.map[chef.y + possible_distance][chef.x + possible_distance].content = chef
+            self.map[chef.y][chef.x].content = None
+            chef.move_to_new_position(
+                y=chef.y + possible_distance, 
+                x=chef.x + possible_distance
+            )
 
 
     def __handle_use_action(self, chef, direction):
         if not chef.held_item:
-            if direction == constants.DIRECTION_UP and isinstance(self.map[chef.y - 1][chef.x].content, UsableObect):
+            if direction == constants.DIRECTION_UPPER_LEFT and isinstance(
+                self.map[chef.y - 1][chef.x - 1].content,
+                UsableObect
+            ):
+                self.map[chef.y - 1][chef.x - 1].content.use()
+            elif direction == constants.DIRECTION_UP and isinstance(
+                self.map[chef.y - 1][chef.x].content, 
+                UsableObect
+            ):
                 self.map[chef.y - 1][chef.x].content.use()
-            elif direction == constants.DIRECTION_LEFT and isinstance(self.map[chef.y][chef.x - 1].content, UsableObect):
+            elif direction == constants.DIRECTION_UPPER_RIGHT and isinstance(
+                self.map[chef.y - 1][chef.x + 1].content,
+                UsableObect
+            ):
+                self.map[chef.y - 1][chef.x + 1].content.use()
+            elif direction == constants.DIRECTION_LEFT and isinstance(
+                self.map[chef.y][chef.x - 1].content,
+                UsableObect
+            ):
                 self.map[chef.y][chef.x - 1].content.use()
-            elif direction == constants.DIRECTION_RIGHT and isinstance(self.map[chef.y][chef.x + 1].content, UsableObect):
+            elif direction == constants.DIRECTION_RIGHT and isinstance(
+                self.map[chef.y][chef.x + 1].content,
+                UsableObect
+            ):
                 self.map[chef.y][chef.x + 1].content.use()
-            elif direction == constants.DIRECTION_DOWN and isinstance(self.map[chef.y + 1][chef.x].content, UsableObect):
+            elif direction == constants.DIRECTION_LOWER_LEFT and isinstance(
+                self.map[chef.y + 1][chef.x - 1].content,
+                UsableObect
+            ):
+                self.map[chef.y + 1][chef.x - 1].content.use()
+            elif direction == constants.DIRECTION_DOWN and isinstance(
+                self.map[chef.y + 1][chef.x].content, 
+                UsableObect
+            ):
                 self.map[chef.y + 1][chef.x].content.use()
+            elif direction == constants.DIRECTION_LOWER_RIGHT and isinstance(
+                self.map[chef.y + 1][chef.x + 1].content,
+                UsableObect
+            ):
+                self.map[chef.y + 1][chef.x + 1].content.use()
 
 
     def __handle_pick_action(self, chef, direction):
         if not chef.held_item:
-            if direction == constants.DIRECTION_UP and isinstance(self.map[chef.y - 1][chef.x].content, Table):
+            if direction == constants.DIRECTION_UPPER_LEFT and isinstance(
+                self.map[chef.y - 1][chef.x - 1].content,
+                Table
+            ):
+                chef.pick_up(self.map[chef.y - 1][chef.x - 1].content.put_off_content())
+            elif direction == constants.DIRECTION_UP and isinstance(
+                self.map[chef.y - 1][chef.x].content, 
+                Table
+            ):
                 chef.pick_up(self.map[chef.y - 1][chef.x].content.put_off_content())
-            elif direction == constants.DIRECTION_LEFT and isinstance(self.map[chef.y][chef.x - 1].content, Table):
+            elif direction == constants.DIRECTION_UPPER_RIGHT and isinstance(
+                self.map[chef.y - 1][chef.x + 1].content,
+                Table
+            ):
+                chef.pick_up(self.map[chef.y - 1][chef.x + 1].content.put_off_content())
+            elif direction == constants.DIRECTION_LEFT and isinstance(
+                self.map[chef.y][chef.x - 1].content, 
+                Table
+            ):
                 chef.pick_up(self.map[chef.y][chef.x - 1].content.put_off_content())
-            elif direction == constants.DIRECTION_RIGHT and isinstance(self.map[chef.y][chef.x + 1].content, Table):
+            elif direction == constants.DIRECTION_RIGHT and isinstance(
+                self.map[chef.y][chef.x + 1].content,
+                Table
+            ):
                 chef.pick_up(self.map[chef.y][chef.x + 1].content.put_off_content())
-            elif direction == constants.DIRECTION_DOWN and isinstance(self.map[chef.y + 1][chef.x].content, Table):
+            elif direction == constants.DIRECTION_LOWER_LEFT and isinstance(
+                self.map[chef.y + 1][chef.x - 1].content,
+                Table
+            ):
+                chef.pick_up(self.map[chef.y + 1][chef.x - 1].content.put_off_content())
+            elif direction == constants.DIRECTION_DOWN and isinstance(
+                self.map[chef.y + 1][chef.x].content,
+                Table
+            ):
                 chef.pick_up(self.map[chef.y + 1][chef.x].content.put_off_content())
+            elif direction == constants.DIRECTION_LOWER_RIGHT and isinstance(
+                self.map[chef.y + 1][chef.x + 1].content,
+                Table
+            ):
+                chef.pick_up(self.map[chef.y + 1][chef.x + 1].content.put_off_content())
             
 
     def __handle_put_action(self, chef, direction):
         if chef.held_item:
-            if direction == constants.DIRECTION_UP and self.map[chef.y - 1][chef.x].content and not isinstance(self.map[chef.y - 1][chef.x].content, Wall):
+            if direction == constants.DIRECTION_UPPER_LEFT and \
+                    self.map[chef.y - 1][chef. x - 1].content and \
+                    not isinstance(self.map[chef.y - 1][chef.x - 1].content, Wall):
+                self.map[chef.y - 1][chef.x - 1].content.put_on_chef_held_item(chef)
+            elif direction == constants.DIRECTION_UP and \
+                    self.map[chef.y - 1][chef.x].content and \
+                    not isinstance(self.map[chef.y - 1][chef.x].content, Wall):
                 self.map[chef.y - 1][chef.x].content.put_on_chef_held_item(chef)
-            elif direction == constants.DIRECTION_LEFT and self.map[chef.y][chef.x - 1].content and not isinstance(self.map[chef.y][chef.x - 1].content, Wall):
+            elif direction == constants.DIRECTION_UPPER_RIGHT and \
+                    self.map[chef.y - 1][chef. x + 1].content and \
+                    not isinstance(self.map[chef.y - 1][chef.x + 1].content, Wall):
+                self.map[chef.y - 1][chef.x + 1].content.put_on_chef_held_item(chef)
+            elif direction == constants.DIRECTION_LEFT and \
+                    self.map[chef.y][chef.x - 1].content and \
+                    not isinstance(self.map[chef.y][chef.x - 1].content, Wall):
                 self.map[chef.y][chef.x - 1].content.put_on_chef_held_item(chef)
-            elif direction == constants.DIRECTION_RIGHT and self.map[chef.y][chef.x + 1].content and not isinstance(self.map[chef.y][chef.x + 1].content, Wall):
+            elif direction == constants.DIRECTION_RIGHT and \
+                    self.map[chef.y][chef.x + 1].content and \
+                    not isinstance(self.map[chef.y][chef.x + 1].content, Wall):
                 self.map[chef.y][chef.x + 1].content.put_on_chef_held_item(chef)
-            elif direction == constants.DIRECTION_DOWN and self.map[chef.y + 1][chef.x].content and not isinstance(self.map[chef.y + 1][chef.x].content, Wall):
+            elif direction == constants.DIRECTION_LOWER_LEFT and \
+                    self.map[chef.y + 1][chef. x - 1].content and \
+                    not isinstance(self.map[chef.y + 1][chef.x - 1].content, Wall):
+                self.map[chef.y + 1][chef.x - 1].content.put_on_chef_held_item(chef)
+            elif direction == constants.DIRECTION_DOWN and \
+                    self.map[chef.y + 1][chef.x].content and \
+                    not isinstance(self.map[chef.y + 1][chef.x].content, Wall):
                 self.map[chef.y + 1][chef.x].content.put_on_chef_held_item(chef)
+            elif direction == constants.DIRECTION_LOWER_LEFT and \
+                    self.map[chef.y + 1][chef. x - 1].content and \
+                    not isinstance(self.map[chef.y + 1][chef.x - 1].content, Wall):
+                self.map[chef.y + 1][chef.x - 1].content.put_on_chef_held_item(chef)
 
 
     def handle_action(self, agent, action):
@@ -263,7 +409,7 @@ class World():
     def get_all_game_info(self):
         game_info = {}
         
-        game_info['current_map'] = self.map
+        game_info['map'] = self.map
         game_info['obtained_reward'] = self.obtained_reward
         game_info['remaining_time'] = self.remaining_time
         game_info['current_orders'] = self.current_orders
