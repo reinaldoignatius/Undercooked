@@ -18,7 +18,7 @@ ACTION_CUT_A = 'cut a'
 ACTION_CUT_B = 'cut b'
 ACTION_MIX_A_AND_C = 'mix a and c'
 ACTION_PASS_C = 'pass c'
-ACTION_PASS_MIXING_BOWL = 'pass mixing bowl'
+ACTION_PASS_MIXED_BOWL = 'pass mixed bowl'
 ACTION_PASS_DIRTY_PLATE = 'pass dirty plate'
 ACTION_PASS_CLEAN_PLATE = 'pass clean plate'
 ACTION_COOK_B = 'cook b'
@@ -29,7 +29,7 @@ ACTION_SUBMIT_A = 'submit a'
 ACTION_SUBMIT_B = 'submit b'
 ACTION_WASH_PLATE = 'wash plate'
 ACTION_PUT_ASIDE_C = 'put aside c'
-ACTION_PUT_ASIDE_MIXED_BOWL = 'put aside mixed bowl'
+ACTION_PUT_ASIDE_MIXING_BOWL = 'put aside mixing bowl'
 ACTION_PUT_ASIDE_DIRTY_PLATE = 'put aside dirty plate'
 ACTION_PUT_ASIDE_CLEAN_PLATE = 'put aside clean plate'
 ACTION_PUT_ASIDE_COOKABLE_CONTAINER = 'put aside cookable container'
@@ -60,7 +60,7 @@ RIGHT_SIDE_ACTION_CHOICES = [
     ACTION_PLATE_B,
     ACTION_SUBMIT_A,
     ACTION_SUBMIT_B,
-    ACTION_PUT_ASIDE_MIXED_BOWL,
+    ACTION_PUT_ASIDE_MIXING_BOWL,
     ACTION_PUT_ASIDE_CLEAN_PLATE,
     ACTION_DO_NOTHING
 ]

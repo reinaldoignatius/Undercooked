@@ -364,7 +364,7 @@ class Agent():
         return chosen_path
 
 
-    def __translate_action_to_game_action(self, action_idx, game_info):
+    def __translate_action_to_game_action(self, action, game_info):
         own_chef = game_info['chefs'][int(self.__name[-1:]) - 1]
 
         bound_ingredients = []
@@ -407,6 +407,12 @@ class Agent():
 
         closest_path = None
         if self.__side == constants.SIDE_LEFT:
+            on_mixer_bowls = []
+            for mixer in game_info['mixers']:
+                on_mixer_bowls += filter(
+                    lambda bowl: bowl.x == mixer.x and bowl.y == mixer.y,
+                    game_info['bowls']
+                )
             empty_left_side_table_positions = list(map(
                 lambda table: (table.x, table.y),
                 filter(
@@ -415,7 +421,7 @@ class Agent():
                 )
             ))
 
-            if action_idx == 0: # Cut a
+            if action == constants.ACTION_CUT_C:
                 if not own_chef.held_item:
                     on_cutting_board_uncut_a_ingredients = []
                     for cutting_board in game_info['cutting_boards']:        
@@ -499,19 +505,16 @@ class Agent():
                             closest_path['direction']
                         )
                         
-            elif action_idx == 1: # Mix a and c
+            elif action == constants.ACTION_MIX_A_AND_C:
                 left_side_bowls = filter(
                     lambda bowl: bowl.x <= constants.PASSING_TABLE_X, 
                     
                 )
                 if not own_chef.held_item:
-                    on_mixer_full_bowls = []
-                    for mixer in game_info['mixers']:
-                        on_mixer_full_bowls += filter(
-                            lambda bowl: len(bowl.contents) == 2 and \ 
-                                bowl.x == mixer.x and bowl.y == mixer.y,
-                            left_side_bowls
-                        )
+                    on_mixer_full_bowls = filter(
+                        lambda on_mixer_bowl: len(on_mixer_bowl.contents) == 2,
+                        on_mixer_bowls
+                    )
                     not_on_mixer_full_bowls = [bowl for bowl in full_bowls \
                         if bowl not in on_mixer_full_bowls]
                     # Get full bowl from table
@@ -660,7 +663,7 @@ class Agent():
                             closest_path['direction']
                         )
 
-        elif action_idx == 2: # Pass mixed bowl
+        elif action == constants.PASS_MIXED_BOWL:
             if not own_chef.held_item:
                 # Get mixed bowl
                 unpassed_mixed_bowl = filter(
@@ -692,7 +695,7 @@ class Agent():
                                 closest_path['direction']
                             )
 
-        elif action_idx == 3 # Pass clean plate
+        elif action == constants.PASS_CLEAN_PLATE:
             if not own_chef.held_item:
                 # Get clean plate
                 left_side_clean_plate = filter(
@@ -724,7 +727,7 @@ class Agent():
                                 closest_path['direction']
                             )  
 
-        elif action_idx == 4 # Wash plate
+        elif action == constants.ACTION_WASH_PLATE:
             if not own_chef.held_item:
                 if game_info['sink'].dirty_plates:
                     # Use sink
@@ -768,7 +771,7 @@ class Agent():
                             closest_path['direction']
                         )
 
-        elif action_idx == 5: # Put aside c
+        elif action == constants.ACTION_PUT_ASIDE_C:
             if not own_chef.held_item:
                 # Get c from passing table
                 on_passing_table_c = filter(
@@ -801,14 +804,76 @@ class Agent():
                                 closest_path['direction']
                             )
         
-        elif action_idx == 6: # Put aside mixing bowl
-                        
+        elif action == constants.ACTION_PUT_ASIDE_MIXING_BOWL:
+            if not own_chef.held_item:
+                # Get most progressed on mixer bowl
+                max_progress = max(bowl.progress for bowl in on_mixer_bowls)
+                closest_path = self.__get_closest_path(
+                    game_info['map'],
+                    (own_chef.x, own_chef.y),
+                    list(map(
+                        lambda bowl: (bowl.x, bowl.y),
+                        filter(lambda bowl: bowl.progress == max_progress, on_mixer_bowls)
+                    ))
+                )
+                if closest_path['distance'] == 0:
+                    return "%s %s" % (
+                        game_constants.ACTION_PICK,
+                        closest_path['direction']
+                    )
+            else:
+                # Put bowl on side table
+                if isinstance(own_chef.held_item, Bowl):
+                    closest_path = self.__get_closest_path(
+                        game_info['map'],
+                        (own_chef.x, own_chef.y),
+                        empty_left_side_table_positions
+                    )
+                    if closest_path['distance'] == 0:
+                        return "%s %s" % (
+                            game_constants.ACTION_PUT,
+                            closest_path['direction']
+                        )
 
+        elif action == constants.ACTION_PUT_DIRTY_PLATE:
+            if not own_chef.held_item:
+                # Get dirty plate from passing table
+                on_passing_table_dirty_plates = filter(
+                    lambda plate: plate.x == constants.PASSING_TABLE_X and plate.is_dirty,
+                    game_info['plates']
+                )
+                closest_path = self.__get_closest_path(
+                    game_info['map'],
+                    (own_chef.x, own_chef.y),
+                    list(map(lambda plate: (plate.x, plate.y), on_passing_table_dirty_plates))
+                )
+                if closest_path['distance'] == 0:
+                    return "%s %s" % (
+                        game_constants.ACTION_PICK,
+                        closest_path['direction']
+                    )
+            else:
+                # Put dirty plate on side table
+                if isinstance(own_chef.held_item, Plate):
+                    if own_chef.held_item.is_dirty:
+                        closest_path = self.__get_closest_path(
+                            game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            empty_left_side_table_positions
+                        )
+                        if closest_path['distance'] == 0:
+                            return "%s %s" % (
+                                game_constants.ACTION_PUT,
+                                closest_path['direction']
+                            )
+        
         if closest_path:
             return "%s %s" % (
                 game_constants.ACTION_WALK,
                 closest_path['direction']
             )
+        else:
+            return "do nothing"
 
 
     def build_model(self, graph):
@@ -828,6 +893,7 @@ class Agent():
 
 
     def act(self, game_info, blackboard_recent_writings):
+        action_idx = None
         if np.random.rand() <= self.__epsilon:
             action_idx = random.randrange(len(constants.LEFT_SIDE_ACTION_CHOICES) if 
                 self.__side == constants.SIDE_LEFT else 
@@ -838,7 +904,12 @@ class Agent():
                 blackboard_recent_writings
             ))
             action_idx = np.argmax(act_values[0])
-        return self.__translate_action_to_game_action(action_idx, game_info)
+        return self.__translate_action_to_game_action(
+            constants.LEFT_SIDE_ACTION_CHOICES[action_idx] if \
+                self.__side == constants.SIDE_LEFT else \
+                constants.RIGHT_SIDE_ACTION_CHOICES[action_idx],
+            game_info
+        )
 
 
     def replay(self, batch_size):
