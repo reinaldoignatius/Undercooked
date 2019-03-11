@@ -35,6 +35,7 @@ class World():
         self.stoves = []
         self.sink = None
         self.cutting_boards = []
+        self.ingredient_boxes = []
         self.ingredients = []
         self.possible_orders = []
         self.current_orders = []
@@ -115,6 +116,7 @@ class World():
                                     x=col,
                                     y=row
                                 )
+                                self.ingredient_boxes.append(self.map[row][col].content)
                         
         with open('levels/%s/pos.json' % level_name) as infile:
             position = json.load(infile)
@@ -419,6 +421,7 @@ class World():
         game_info['cookable_containers'] = self.cookable_containers
         game_info['stoves'] = self.stoves
         game_info['cutting_boards'] = self.cutting_boards
+        game_info['ingredient_boxes'] = self.ingredient_boxes
         game_info['ingredients'] = self.ingredients
         game_info['plates'] = self.plates
         game_info['return_counter'] = self.return_counter

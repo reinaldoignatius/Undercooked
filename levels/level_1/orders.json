@@ -20,9 +20,9 @@
                     ]
                 }
             ],
-            "allocated_time": 200,
+            "allocated_time": 400,
             "maximum_reward": 120
         }
     ],
-    "time_between_orders": 81
+    "time_between_orders": 161
 }

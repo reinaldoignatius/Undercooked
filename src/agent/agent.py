@@ -1,5 +1,6 @@
 import random
 import math
+import copy
 import numpy as np
 from collections import deque
 from keras.models import Sequential
@@ -7,6 +8,8 @@ from keras.layers import Dense
 from keras.optimizers import Adam
 from . import constants
 import constants as game_constants
+from ingredient import Ingredient
+from bowl import Bowl
 
 class Agent():
 
@@ -361,75 +364,305 @@ class Agent():
 
 
     def __translate_action_to_game_action(self, action_idx, game_info):
+        # Chefs
         own_chef = game_info['chefs'][int(self.__name[-1:]) - 1]
 
-        not_held_ingredients = game_info['ingredients']
-        for chef in game_info['chefs']:
-            not_held_ingredients = filter(
-                lambda ingredient: ingredient.x == chef.x and ingredient.y == chef.y,
-                not_held_ingredients
+        # Ingredients
+        bound_ingredients = []
+        for container in game_info['chefs'] + \
+                game_info['bowls'] + \
+                game_info['cookable_containers'] + \
+                game_info['plates']:
+            bound_ingredients += filter(
+                lambda ingredient: ingredient.x == container.x and \
+                    ingredient.y == container.y,
+                game_info['ingredients']
             )
+        
+        unbound_ingredients = [ingredient for ingredient in game_info['ingredients'] \
+            if ingredient not in bound_ingredients]
 
         a_ingredients = filter(
             lambda ingredient: ingredient.name == game_constants.INGREDIENT_A_NAME, 
-            not_held_ingredients
+            unbound_ingredients
         )
         b_ingredients = filter(
             lambda ingredient: ingredient.name == game_constants.INGREDIENT_B_NAME,
-            not_held_ingredients
+            unbound_ingredients
         )
         c_ingredients = filter(
             lambda ingredient: ingredient.name == game_constants.INGREDIENT_C_NAME,
-            not_held_ingredients
+            unbound_ingredients
         )
 
-        uncut_a_ingredients = filter(
-            lambda a_ingredient: not a_ingredient.processes_done, a_ingredients)
-        uncut_b_ingredients = filter(
-            lambda b_ingredient: not b_ingredient.processes_done, b_ingredients)
+        uncut_a_ingredients = filter(lambda a: not a.processes_done, a_ingredients)
+        cut_a_ingredients = filter(lambda a: a.processes_done, a_ingredients)
 
-        uncut_a_ingredients_on_cutting_board = []
-        uncut_b_ingredients_on_cutting_board = []
+        uncut_b_ingredients = filter(lambda b: not b.processes_done, b_ingredients)
+        cut_b_ingredients = filter(lambda b: b.processes_done, b_ingredients)
+
+        passed_c_ingredients = filter(
+            lambda c: c.x <= constants.PASSING_TABLE_X,
+            c_ingredients
+        )
+
+        on_cutting_board_uncut_a_ingredients = []
+        on_cutting_board_uncut_b_ingredients = []
         for cutting_board in game_info['cutting_boards']:        
-            uncut_a_ingredients_on_cutting_board += filter(
+            on_cutting_board_uncut_a_ingredients += filter(
                 lambda uncut_a: uncut_a.x == cutting_board.x and uncut_a.y == cutting_board.y,
                 uncut_a_ingredients
             )
-            uncut_a_ingredients_on_cutting_board += filter(
+            on_cutting_board_uncut_b_ingredients += filter(
                 lambda uncut_b: uncut_b.x == cutting_board.x and uncut_b.y == cutting_board.y,
                 uncut_b_ingredients
             )
 
-        uncut_a_ingredients_not_on_cutting_board = [a for a in uncut_a_ingredients \
-            if a not in uncut_a_ingredients_on_cutting_board]
-        uncut_b_ingredients_not_on_cutting_board = [b for b in uncut_b_ingredients \
-            if b not in uncut_b_ingredients_on_cutting_board]
+        not_on_cutting_board_uncut_a_ingredients = [a for a in uncut_a_ingredients \
+            if a not in on_cutting_board_uncut_a_ingredients]
+        not_on_cutting_board_uncut_b_ingredients = [b for b in uncut_b_ingredients \
+            if b not in on_cutting_board_uncut_b_ingredients]
 
+        # Cutting boards
+        empty_cutting_boards = filter(
+            lambda cutting_board: not cutting_board.content,
+            game_info['cutting_boards']
+        )
+
+        left_side_empty_cutting_boards = filter(
+            lambda empty_cutting_board: empty_cutting_board.x < constants.PASSING_TABLE_X,
+            empty_cutting_boards    
+        )
+        right_side_empty_cutting_boards = filter(
+            lambda empty_cutting_boards: empty_cutting_boards > constants.PASSING_TABLE_X,
+            empty_cutting_boards
+        )
+
+        # Ingredient boxes
+        ingredient_boxes = {}
+        for ingredient_box in game_info['ingredient_boxes']:
+            ingredient_boxes[ingredient_box.name.lower()] = ingredient_box
+
+        # Bowls
+        left_side_bowls = filter(
+            lambda bowl: bowl.x <= constants.PASSING_TABLE_X, 
+            game_info['bowls']
+        )
+        
+        only_contain_a_bowls = filter(lambda bowl: len(bowl.contents) == 1 and filter(
+            lambda content: content.name == 'a', bowl.contents
+        ), left_side_bowls)
+        only_contain_c_bowls = filter(lambda bowl: len(bowl.contents) == 1 and filter(
+            lambda content: content.name == 'c', bowl.contents
+        ), left_side_bowls)
+        empty_bowls = filter(lambda bowl: not bowl.contents, left_side_bowls)
+        not_full_bowls = only_contain_a_bowls + only_contain_c_bowls + empty_bowls
+        full_bowls = filter(lambda bowl: len(bowl.contents) == 2, left_side_bowls)
+
+        on_mixer_full_bowls = []
+        for mixer in game_info['mixers']:
+            on_mixer_full_bowls += filter(
+                lambda full_bowl: full_bowl.x == mixer.x and full_bowl.y == mixer.y,
+                full_bowls
+            )
+        
+        not_on_mixer_full_bowls = [bowl for bowl in full_bowls \
+            if bowl not in on_mixer_full_bowls]
+
+        # Mixers
+        empty_mixers = filter(lambda mixer: not mixer.content, game_info['mixers'])
+
+        closest_path = None
         if self.__side == constants.SIDE_LEFT:
             if action_idx == 0: # Cut a
                 if not own_chef.held_item:
+                    if on_cutting_board_uncut_a_ingredients:
+                        max_progress = max(
+                            a.progress for a in on_cutting_board_uncut_a_ingredients
+                        )
+                        closest_path = self.__get_closest_path(
+                            game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            list(map(
+                                lambda a: (a.x, a.y), 
+                                filter(
+                                    lambda a: a.progress == max_progress,
+                                    on_cutting_board_uncut_a_ingredients
+                                )
+                            ))
+                        )
+                        if closest_path['distance'] == 0:
+                            return "%s %s" % (
+                                game_constants.ACTION_USE, 
+                                closest_path['direction']
+                            )
+                    elif not_on_cutting_board_uncut_a_ingredients:
+                        closest_path = self.__get_closest_path(
+                            game_info['map']
+                            (own_chef.x, own_chef.y),
+                            list(map(
+                                lambda a: (a.x, a.y),
+                                not_on_cutting_board_uncut_a_ingredients
+                            ))
+                        )
+                        if closest_path['distance'] == 0:
+                            return "%s %s" % (
+                                game_constants.ACTION_PICK,
+                                closest_path['direction']
+                            )
+                    else:
+                        closest_path = self.__a_star(
+                            game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            ingredient_boxes['a'],
+                        )
+                        if closest_path['distance' == 0]:
+                            return "%s %s" % (
+                                game_constants.ACTION_USE, 
+                                closest_path['direction']
+                            )
+                elif own_chef.held_item.name == 'a' and \
+                        not game_constants.PROCESS_CUT in own_chef.held_item.processes_done:
                     closest_path = self.__get_closest_path(
                         game_info['map'],
                         (own_chef.x, own_chef.y),
                         list(map(
-                            lambda a: (a.x, a.y), 
-                            uncut_a_ingredients_on_cutting_board if \
-                                uncut_a_ingredients_on_cutting_board else \
-                                uncut_a_ingredients_not_on_cutting_board
+                            lambda cutting_board: (cutting_board.x, cutting_board.y),
+                            left_side_empty_cutting_boards
                         ))
                     )
                     if closest_path['distance'] == 0:
                         return "%s %s" % (
-                            game_constants.ACTION_USE, 
+                            game_constants.ACTION_PUT, 
                             closest_path['direction']
                         )
-                    return "%s %s" % (
-                        game_constants.ACTION_WALK,
-                        closest_path['direction']
-                    )
+                        
             elif action_idx == 1: # Mix a and c
+                if not own_chef.held_item:
+                    if not_on_mixer_full_bowls:
+                        closest_path = self.__get_closest_path(
+                            game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            list(map(
+                                lambda bowl: (bowl.x, bowl.y),
+                                not_on_mixer_full_bowls
+                            ))
+                        )
+                    else:
+                        max_progress = max(bowl.progress for bowl in not_full_bowls)
+                        candidate_bowls = copy.copy(not_full_bowls)
+                        if max_progress > 0:
+                            candidate_bowls = filter(
+                                lambda candidate_bowl: candidate_bowl.progress = max_progress,
+                                candidate_bowls
+                            )
+                        one_content_candidate_bowls = filter(
+                            lambda candidate_bowl: len(candidate_bowl.contents) == 1,
+                            candidate_bowls
+                        )
+                        candidate_destinations = []
+                        if one_content_candidate_bowls:
+                            contain_a_candidate_bowls = filter(
+                                lambda candidate_bowl: candidate_bowls.contents[0].name == 'a',
+                                one_content_candidate_bowls 
+                            )
+                            contain_c_candidate_bowls = filter(
+                                lambda candidate_bowl: candidate_bowls.contents[0].name == 'c',
+                                one_content_candidate_bowls
+                            )
+                            if contain_a_candidate_bowls:
+                                candidate_destinations += list(map(
+                                    lambda a: (a.x, a.y), 
+                                    cut_a_ingredients
+                                ))
+                            if contain_c_candidate_bowls:
+                                candidate_destinations += list(map(
+                                    lambda c: (c.x, c.y),
+                                    passed_c_ingredients
+                                ))
+                        else:
+                            candidate_destinations = list(map(
+                                lambda ingredient: (ingredient.x, ingredient.y),
+                                cut_a_ingredients + passed_c_ingredients
+                            ))
+                        closest_path = self.__get_closest_path(
+                            game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            candidate_destinations
+                        )
+                    if closest_path['distance'] == 0:
+                        return "%s %s" % (
+                            game_constants.ACTION_PICK, 
+                            closest_path['direction']
+                        )
+                else:
+                    if isinstance(own_chef.held_item, Ingredient):
+                        if own_chef.held_item.name == 'a' and game_constants.PROCESS_CUT in \
+                                own.chef.held_item.processes_done:
+                            if only_contain_c_bowls:
+                                max_progress = max(
+                                    bowl.progress for bowl in only_contain_c_bowls
+                                )
+                                closest_path = self.__get_closest_path(
+                                    game_info['map'],
+                                    (own_chef.x, own_chef.y),
+                                    list(map(
+                                        lambda bowl: (bowl.x, bowl.y),
+                                        filter(
+                                            lambda bowl: bowl.progress == max_progress,
+                                            only_contain_c_bowls
+                                        )    
+                                    ))
+                                )
+                            else:
+                                closest_path = self.__get_closest_path(
+                                    game_info['map'],
+                                    (own_chef.x, own_chef.y),
+                                    list(map(lambda bowl: (bowl.x, bowl.y), empty_bowls))
+                                ))
+                        elif own_chef.held_item.name == 'c':
+                            if only_contain_a_bowls:
+                                max_progress = max(
+                                    bowl.progress for bowl in only_contain_a_bowls
+                                )
+                                closest_path = self.__get_closest_path(
+                                    game_info['map'],
+                                    (own_chef.x, own_chef.y),
+                                    list(map(
+                                        lambda bowl: (bowl.x, bowl.y)
+                                        filter(
+                                            lambda bowl: bowl.progress == max_progress,
+                                            only_contain_a_bowls
+                                        )
+                                    ))
+                                )
+                            else:
+                                closest_path = self.__get_closest_path(
+                                    game_info['map'],
+                                    (own_chef.x, own_chef.y),
+                                    list(map(lambda bowl: (bowl.x, bowl.y), empty_bowls))
+                                ))
+                    elif isinstance(own_chef.held_item, Bowl):
+                        closest_path = self.__get_closest_path(
+                            game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            list(map(
+                                lambda mixer: (mixer.x, mixer.y),
+                                empty_mixers
+                            ))
+                        )
+                    if closest_path['distance'] == 0:
+                        return "%s %s" % (
+                            game_constants.ACTION_PUT, 
+                            closest_path['direction']
+                        )
         else:
             pass
+
+        return "%s %s" % (
+            game_constants.ACTION_WALK,
+            closest_path['direction']
+        )
 
 
     def build_model(self, graph):
