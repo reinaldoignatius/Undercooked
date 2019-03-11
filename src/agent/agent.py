@@ -365,10 +365,8 @@ class Agent():
 
 
     def __translate_action_to_game_action(self, action_idx, game_info):
-        # Chefs
         own_chef = game_info['chefs'][int(self.__name[-1:]) - 1]
 
-        # Ingredients
         bound_ingredients = []
         for container in game_info['chefs'] + \
                 game_info['bowls'] + \
@@ -379,19 +377,11 @@ class Agent():
                     ingredient.y == container.y,
                 game_info['ingredients']
             )
-        
         unbound_ingredients = [ingredient for ingredient in game_info['ingredients'] \
             if ingredient not in bound_ingredients]
 
-        cut_a_ingredients = filter(lambda a: a.processes_done, a_ingredients)
-
         uncut_b_ingredients = filter(lambda b: not b.processes_done, b_ingredients)
         cut_b_ingredients = filter(lambda b: b.processes_done, b_ingredients)
-
-        passed_c_ingredients = filter(
-            lambda c: c.x <= constants.PASSING_TABLE_X,
-            c_ingredients
-        )
 
         on_cutting_board_uncut_b_ingredients = []
         for cutting_board in game_info['cutting_boards']:      
@@ -403,12 +393,10 @@ class Agent():
         not_on_cutting_board_uncut_b_ingredients = [b for b in uncut_b_ingredients \
             if b not in on_cutting_board_uncut_b_ingredients]
 
-        # Ingredient boxes
         ingredient_boxes = {}
         for ingredient_box in game_info['ingredient_boxes']:
             ingredient_boxes[ingredient_box.name.lower()] = ingredient_box
 
-        # Tables
         empty_passing_table_positions = list(map(
             lambda table: (table.x, table.y),
             filter(
@@ -417,13 +405,16 @@ class Agent():
             )
         ))
 
-        # Plates
-        unpassed_clean_plates = filter(
-            lambda plate: plate.x < constants.PASSING_TABLE_X and not 
-        )
-
         closest_path = None
         if self.__side == constants.SIDE_LEFT:
+            empty_left_side_table_positions = list(map(
+                lambda table: (table.x, table.y),
+                filter(
+                    lambda table: table.x < constants.PASSING_TABLE_X and not table.content,
+                    game_info['tables']
+                )
+            ))
+
             if action_idx == 0: # Cut a
                 if not own_chef.held_item:
                     on_cutting_board_uncut_a_ingredients = []
@@ -550,6 +541,12 @@ class Agent():
                             candidate_bowls
                         )
                         candidate_destinations = []
+                        left_side_c_ingredients = filter(
+                            lambda ingredient: ingredient.name == \
+                                game_constants.INGREDIENT_C_NAME and \
+                                ingredient.x < constants.PASSING_TABLE_X,
+                            unbound_ingredients
+                        ) 
                         if one_content_candidate_bowls:
                             contain_a_candidate_bowls = filter(
                                 lambda candidate_bowl: candidate_bowls.contents[0].name == 'a',
@@ -567,12 +564,12 @@ class Agent():
                             if contain_c_candidate_bowls:
                                 candidate_destinations += list(map(
                                     lambda c: (c.x, c.y),
-                                    passed_c_ingredients
+                                    left_side_c_ingredients
                                 ))
                         else:
                             candidate_destinations = list(map(
                                 lambda ingredient: (ingredient.x, ingredient.y),
-                                cut_a_ingredients + passed_c_ingredients
+                                cut_a_ingredients + left_side_c_ingredients
                             ))
                         closest_path = self.__get_closest_path(
                             game_info['map'],
@@ -771,6 +768,41 @@ class Agent():
                             closest_path['direction']
                         )
 
+        elif action_idx == 5: # Put aside c
+            if not own_chef.held_item:
+                # Get c from passing table
+                on_passing_table_c = filter(
+                    lambda ingredient: ingredient.name == \
+                        game_constants.INGREDIENT_C_NAME and \
+                        ingredient.x == constants.PASSING_TABLE_X
+                )
+                closest_path = self.__get_closest_path(
+                    game_info['map'],
+                    (own_chef.x, own_chef.y),
+                    list(map(lambda c: (c.x, c.y), on_passing_table_c))
+                )
+                if closest_path['distance'] == 0:
+                    return "%s %s" % (
+                        game_constants.ACTION_PICK,
+                        closest_path['direction']
+                    )
+            else:
+                # Put c on side table
+                if isinstance(own_chef.held_item, Ingredient):
+                    if own_chef.held_item.name == game_constants.INGREDIENT_C_NAME:
+                        closest_path = self.__get_closest_path(
+                            game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            empty_left_side_table_positions
+                        )
+                        if closest_path['distance'] == 0:
+                            return "%s %s" % (
+                                game_constants.ACTION_PUT,
+                                closest_path['direction']
+                            )
+        
+        elif action_idx == 6: # Put aside mixing bowl
+                        
 
         if closest_path:
             return "%s %s" % (
