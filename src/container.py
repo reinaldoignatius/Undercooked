@@ -24,10 +24,6 @@ class Container(MoveableObject, ABC):
             for held_content in chef.held_item.contents:
                 held_content.x = chef.x
                 held_content.y = chef.y
-
-            new_progress = chef.held_item.progress
-            chef.held_item.progress = self.progress
-            self.progress = new_progress
         elif isinstance(chef.held_item, Ingredient):
             # Half current progress if new ingredient is added
             chef.held_item.x = self.x

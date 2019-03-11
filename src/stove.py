@@ -20,10 +20,10 @@ class Stove(Table):
                 if self.content.progress < constants.COOK_TICKS:
                     self.content.progress += 1
                 else:
-                    if not self.content.cooked:
+                    if not self.content.is_cooked:
                         for ingredient in self.content.contents:
                             ingredient.processes_done.append(constants.PROCESS_COOKED)
-                        self.content.cooked = True
+                        self.content.is_cooked = True
 
     def print_static(self):
         print('O', end='')

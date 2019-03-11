@@ -22,7 +22,7 @@ class Mixer(Table):
                     if self.content.progress >= constants.MIX_TICKS:
                         for ingredient in self.content.contents:
                             ingredient.processes_done.append(constants.PROCESS_MIXED)
-                        self.content.mixed = True
+                        self.contentis_mixed = True
 
         
     def print_static(self):

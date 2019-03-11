@@ -14,8 +14,8 @@ class Sink(Table, UsableObect):
     def put_on_chef_held_item(self, chef):
         if isinstance(chef.held_item, Plate):
             plate = chef.held_item
-            plate.move_to_new_position(x=self.x, y=self.y)
             if plate.is_dirty:
+                plate.move_to_new_position(x=self.x, y=self.y)
                 chef.held_item = None
                 while plate:
                     self.dirty_plates.append(plate)
@@ -27,6 +27,7 @@ class Sink(Table, UsableObect):
                 if not self.content:
                     self.content = plate
                     chef.held_item = None
+                    plate.move_to_new_position(x=self.x, y=self.y)
                 else:
                     self.content.put_on_chef_held_item(chef)
     
