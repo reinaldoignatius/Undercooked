@@ -113,6 +113,6 @@ if __name__ == '__main__':
         world.simulate()
         undercooked.world = world
         undercooked.send('undercooked', undercooked.world.get_all_game_info())
-        time.sleep(1)
+        time.sleep(0.1)
 
     # ns.shutdown()

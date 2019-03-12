@@ -154,7 +154,7 @@ class World():
             while not self.map[chef.y - (possible_distance + 1)] \
                     [chef.x - (possible_distance + 1)].content and \
                     possible_distance < distance:
-                possible_distance += 1\
+                possible_distance += 1
             self.map[chef.y - possible_distance][chef.x - possible_distance].content = chef
             self.map[chef.y][chef.x].content = None
             chef.move_to_new_position(
@@ -174,7 +174,7 @@ class World():
             while not self.map[chef.y - (possible_distance + 1)] \
                     [chef.x + (possible_distance + 1)].content and \
                     possible_distance < distance:
-                possible_distance += 1\
+                possible_distance += 1
             self.map[chef.y - possible_distance][chef.x + possible_distance].content = chef
             self.map[chef.y][chef.x].content = None
             chef.move_to_new_position(
@@ -202,7 +202,7 @@ class World():
             while not self.map[chef.y + (possible_distance + 1)] \
                     [chef.x - (possible_distance + 1)].content and \
                     possible_distance < distance:
-                possible_distance += 1\
+                possible_distance += 1
             self.map[chef.y + possible_distance][chef.x - possible_distance].content = chef
             self.map[chef.y][chef.x].content = None
             chef.move_to_new_position(
@@ -222,7 +222,7 @@ class World():
             while not self.map[chef.y + (possible_distance + 1)] \
                     [chef.x + (possible_distance + 1)].content and \
                     possible_distance < distance:
-                possible_distance += 1\
+                possible_distance += 1
             self.map[chef.y + possible_distance][chef.x + possible_distance].content = chef
             self.map[chef.y][chef.x].content = None
             chef.move_to_new_position(
@@ -415,6 +415,7 @@ class World():
         game_info['obtained_reward'] = self.obtained_reward
         game_info['remaining_time'] = self.remaining_time
         game_info['current_orders'] = self.current_orders
+        game_info['chefs'] = self.chefs
         game_info['tables'] = self.tables
         game_info['bowls'] = self.bowls
         game_info['mixers'] = self.mixers

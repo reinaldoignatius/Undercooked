@@ -14,9 +14,10 @@ class Chef():
             self.held_item.move_to_new_position(x, y)
 
     def pick_up(self, holdableObject):
-        self.held_item = holdableObject
-        self.held_item.x = self.x
-        self.held_item.y = self.y
+        if holdableObject:
+            self.held_item = holdableObject
+            self.held_item.x = self.x
+            self.held_item.y = self.y
 
     def print_static(self):
         print(self.id, end='')
