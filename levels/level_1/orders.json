@@ -12,9 +12,8 @@
                     ]
                 },
                 {
-                    "name": "b",
+                    "name": "c",
                     "required_processes": [
-                        "cut",
                         "mixed",
                         "cooked"
                     ]

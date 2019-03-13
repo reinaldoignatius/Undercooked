@@ -1,19 +1,31 @@
-dash left
-use down
-pick down
 walk left
-dash up
-dash right
-put down
-use down
-use down
-use down
+walk left
 use down
 pick down
 dash left
-dash left
+dash up
+walk left
 put left
 walk up
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
+idle
 idle
 idle
 idle
@@ -54,6 +66,13 @@ walk down
 dash right
 walk right
 walk right
+idle
+idle
+idle
+idle
+idle
+idle
+idle
 put up
 dash left
 dash up
@@ -61,6 +80,12 @@ dash right
 put up
 walk left
 walk left
+idle
+idle
+idle
+idle
+idle
+idle
 idle
 idle
 idle
@@ -71,6 +96,4 @@ idle
 idle
 pick up
 dash left
-walk down
-walk down
 put left

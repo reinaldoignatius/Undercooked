@@ -23,7 +23,6 @@ class Mixer(Table):
                         for ingredient in self.content.contents:
                             ingredient.processes_done.append(constants.PROCESS_MIXED)
                         self.contentis_mixed = True
-
         
     def print_static(self):
         print('M', end='')

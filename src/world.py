@@ -148,7 +148,7 @@ class World():
 
 
     def __handle_move_action(self, chef, direction, distance):
-        possible_distance = 1
+        possible_distance = distance
         if direction == constants.DIRECTION_UPPER_LEFT and \
                 not self.map[chef.y - possible_distance][chef.x - possible_distance].content:
             while not self.map[chef.y - (possible_distance + 1)] \
@@ -397,7 +397,8 @@ class World():
         for idx, current_order in enumerate(self.current_orders):
             if current_order.match(plate.contents):
                 match_idx = idx
-                remaining_time_percentage = current_order.remaining_time / current_order.allocated_time
+                remaining_time_percentage = current_order.remaining_time / \
+                    current_order.allocated_time
                 if remaining_time_percentage >= 0.67:
                     self.obtained_reward += current_order.maximum_reward
                 elif remaining_time_percentage >= 0.33:
@@ -467,7 +468,12 @@ class World():
 
     def print_ingredients(self):
         for ingredient in self.ingredients:
-            print('Name: %s X: %d Y: %d Progress: %d' % (ingredient.name, ingredient.x, ingredient.y, ingredient.progress))
+            print('Name: %s X: %d Y: %d Progress: %d' % (
+                ingredient.name,
+                ingredient.x,
+                ingredient.y,
+                ingredient.progress
+            ))
             for process_done in ingredient.processes_done:
                 print('  %s' % process_done, end=' ')
             print()
@@ -475,9 +481,19 @@ class World():
 
     def print_containers(self):
         for bowl in self.bowls:
-            print('Bowl X: %d Y: %d Progress: %d' % (bowl.x, bowl.y, bowl.progress))
+            print('Bowl X: %d Y: %d Progress: %d Mixed: %s' % (
+                bowl.x,
+                bowl.y,
+                bowl.progress,
+                bowl.is_mixed
+            ))
         for cookable_container in self.cookable_containers:
-            print('Cookable container X: %d Y: %d Progress: %d' % (cookable_container.x, cookable_container.y, cookable_container.progress))
+            print('Cookable container X: %d Y: %d Progress: %d Cooked: %s' % (
+                cookable_container.x,
+                cookable_container.y,
+                cookable_container.progress,
+                cookable_container.is_cooked
+            ))
 
 
     def print_sinks(self):
