@@ -343,8 +343,11 @@ class Agent():
                 g_score[(col, row)] = math.inf        
                 f_score[(col, row)] = math.inf
         g_score[(origin[0], origin[1])] = 0
-        f_score[(origin[0], origin[1])] = abs(destination[0] - origin[0]) + \
-            abs(destination[1] - origin[1])
+        f_score[(origin[0], origin[1])] = (abs(destination[0] - origin[0]) + abs(
+            destination[1] - origin[1])) / game_constants.DASH_DISTANCE
+        
+        map_width = len(current_map[0])
+        map_height = len(current_map)
 
         while open_set:
             current = min(
@@ -360,7 +363,7 @@ class Agent():
                     current[0] + 1 == destination[0] and current[1] == destination[1] or \
                     current[0] + 1 == destination[0] and current[1] + 1 == destination[1]:
                 found = False
-                distance = 1
+                distance = 0
                 while current in came_from and not found:
                     if came_from[current] != origin:
                         current = came_from[current]
@@ -369,8 +372,12 @@ class Agent():
                         found = True
                 path = { 'distance': distance }
 
-                x_direction = current[0] - origin[0]
-                y_direction = current[1] - origin[1]
+                if distance > 0:
+                    x_direction = current[0] - origin[0]
+                    y_direction = current[1] - origin[1]
+                else:
+                    x_direction = current[0] - destination[0]
+                    y_direction = current[1] - destination[1]
 
                 if x_direction < 0 and y_direction < 0:
                     path['direction'] = game_constants.DIRECTION_UPPER_LEFT
@@ -421,51 +428,73 @@ class Agent():
 
             # Add dashable to neighbors
             dash_distance = game_constants.DASH_DISTANCE
+            while current[0] - dash_distance < 0 or current[1] - dash_distance < 0:
+                dash_distance -= 1
             while dash_distance > 1 and \
                     current_map[current[1] - dash_distance][current[0] - dash_distance]:
                 dash_distance -= 1
             if dash_distance > 1:
                 neighbors.append((current[0] - dash_distance, current[1] - dash_distance))
+
             dash_distance = game_constants.DASH_DISTANCE
+            while current[1] - dash_distance < 0:
+                dash_distance -= 1
             while dash_distance > 1 and current_map[current[1] - dash_distance][current[0]]:
                 dash_distance -= 1
-            if disdash_distancetance > 1:
+            if dash_distance > 1:
                 neighbors.append((current[0], current[1] - dash_distance))
+
             dash_distance = game_constants.DASH_DISTANCE
+            while current[0] + dash_distance >= map_width or current[1] - dash_distance < 0:
+                dash_distance -= 1
             while dash_distance > 1 and \
                     current_map[current[1] - dash_distance][current[0] + dash_distance]:
                 dash_distance -= 1
             if dash_distance > 1:
                 neighbors.append((current[0] + dash_distance, current[1] - dash_distance))
+
             dash_distance = game_constants.DASH_DISTANCE
+            while current[0] - dash_distance < 0:
+                dash_distance -= 1
             while dash_distance > 1 and current_map[current[1]][current[0] - dash_distance]:
                 dash_distance -= 1
             if dash_distance > 1:
                 neighbors.append((current[0] - dash_distance, current[1]))
+
             dash_distance = game_constants.DASH_DISTANCE
+            while current[0] + dash_distance >= map_width:
+                dash_distance -= 1
             while dash_distance > 1 and current_map[current[1]][current[0] + dash_distance]:
                 dash_distance -= 1
             if dash_distance > 1:
                 neighbors.append((current[0] + dash_distance, current[1]))
+
             dash_distance = game_constants.DASH_DISTANCE
+            while current[0] - dash_distance < 0 or current[1] + dash_distance >= map_height:
+                dash_distance -= 1
             while dash_distance > 1 and \
                     current_map[current[1] + dash_distance][current[0] - dash_distance]:
                 dash_distance -= 1
             if dash_distance > 1:
                 neighbors.append((current[0] - dash_distance, current[1] + dash_distance))
+
             dash_distance = game_constants.DASH_DISTANCE
+            while current[1] + dash_distance >= map_height:
+                dash_distance -= 1
             while dash_distance > 1 and current_map[current[1] - dash_distance][current[0]]:
                 dash_distance -= 1
             if dash_distance > 1:
                 neighbors.append((current[0], current[1] - dash_distance))
+
             dash_distance = game_constants.DASH_DISTANCE
+            while current[0] + dash_distance >= map_width or \
+                    current[1] + dash_distance >= map_height:
+                dash_distance -= 1
             while dash_distance > 1 and \
                     current_map[current[1] + dash_distance][current[0] + dash_distance]:
                 dash_distance -= 1
             if dash_distance > 1:
                 neighbors.append((current[0] + dash_distance, current[1] + dash_distance))
-            
-            print(neighbors)
 
             for neighbor in neighbors:
                 if not neighbor in closed_set:
@@ -487,8 +516,9 @@ class Agent():
                 chosen_path = self.__a_star(current_map, origin, destination)
             else:
                 candidate_path = self.__a_star(current_map, origin, destination)
-                if candidate_path['distance'] < chosen_path['distance']:
-                    chosen_path = candidate_path
+                if candidate_path:
+                    if candidate_path['distance'] < chosen_path['distance']:
+                        chosen_path = candidate_path
         return chosen_path
 
 
@@ -892,7 +922,7 @@ class Agent():
                         closest_path = self.__a_star(
                             game_info['map'],
                             (own_chef.x, own_chef.y),
-                            map(lambda sink: (sink.x, sink.y), game_info['sink'])
+                            (game_info['sink'].x, game_info['sink'].y)
                         )
                         if closest_path:
                             if closest_path['distance'] == 0:

@@ -148,7 +148,7 @@ class World():
 
 
     def __handle_move_action(self, chef, direction, distance):
-        possible_distance = distance
+        possible_distance = 1
         if direction == constants.DIRECTION_UPPER_LEFT and \
                 not self.map[chef.y - possible_distance][chef.x - possible_distance].content:
             while not self.map[chef.y - (possible_distance + 1)] \

@@ -78,14 +78,14 @@ if __name__ == '__main__':
     chef_1.connect(undercooked_addr, alias='undercooked', handler=chef_handler)
     # chef_2.connect(undercooked_addr, alias='undercooked', handler=chef_handler)
     # chef_3.connect(undercooked_addr, alias='undercooked', handler=chef_handler)
-    # chef_4.connect(undercooked_addr, alias='undercooked', handler=chef_handler)
+    chef_4.connect(undercooked_addr, alias='undercooked', handler=chef_handler)
 
     # Connect chefs to Blackboard System
     blackboard_addr = blackboard.bind('REP', alias='blackboard', handler=blackboard_handler)
     chef_1.connect(blackboard_addr, alias='blackboard')
     # chef_2.connect(blackboard_addr, alias='blackboard')
     # chef_3.connect(blackboard_addr, alias='blackboard')
-    # chef_4.connect(blackboard_addr, alias='blackboard')
+    chef_4.connect(blackboard_addr, alias='blackboard')
     
     # Setup Undercooked world
     world = World()
@@ -104,8 +104,8 @@ if __name__ == '__main__':
     # chef_2.agent.build_model(graph)
     # chef_3.agent = Agent('chef_3', agent_constants.SIDE_LEFT)
     # chef_3.agent.build_model(graph)
-    # chef_4.agent = Agent('chef_4', agent_constants.SIDE_RIGHT)
-    # chef_4.agent.build_model(graph)
+    chef_4.agent = Agent('chef_4', agent_constants.SIDE_RIGHT)
+    chef_4.agent.build_model(graph)
 
     i = 0
     while world.remaining_time > 0:
@@ -114,7 +114,7 @@ if __name__ == '__main__':
         # os.system('clear')
         world = undercooked.world
         world.simulate()
-        world.print_all_game_info()
+        # world.print_all_game_info()
         undercooked.world = world
         undercooked.send('undercooked', undercooked.world.get_all_game_info())
         time.sleep(1)
