@@ -1096,13 +1096,17 @@ class Agent():
                     game_info['cookable_containers']
                 ))
             ))
-            right_side_empty_clean_plates = list(map(
+            right_side_empty_clean_plate_positions = list(map(
                 lambda plate: (plate.x, plate.y),
                 list(filter(
                     lambda plate: len(plate.contents) == 0 and plate.is_clean and \
                         plate.x >= constants.PASSING_TABLE_X ,
                     game_info['plates']                       
                 ))
+            ))
+            submission_counter_positions = list(map(
+                lambda submission_counter: (submission_counter.x , submission_counter.y),
+                game_info['submission_counters']
             ))
 
             if action == constants.ACTION_CUT_B:
@@ -1417,7 +1421,7 @@ class Agent():
                     nearest_path = self.__get_nearest_path(
                         game_info['map'],
                         (own_chef.x, own_chef.y),
-                        right_side_empty_clean_plates
+                        right_side_empty_clean_plate_positions
                     )
                     if nearest_path:
                         if nearest_path['distance'] == 0:
@@ -1445,13 +1449,13 @@ class Agent():
                                     nearest_path['direction']
                                 )
             
-            elif aCtion == constants.ACTION_PLATE_B:
+            elif action == constants.ACTION_PLATE_B:
                 if not own_chef.held_item:
                     # Get empty clean plate
                     nearest_path = self.__get_nearest_path(
                         game_info['map'],
                         (own_chef.x, own_chef.y),
-                        right_side_empty_clean_plates
+                        right_side_empty_clean_plate_positions
                     )
                     if nearest_path:
                         if nearest_path['distance'] == 0:
@@ -1467,7 +1471,7 @@ class Agent():
                                 len(cookable_container.contents) == 1
                         ))
                         nearest_path = self.__get_nearest_path(
-                            game_constants['map'],
+                            game_info['map'],
                             (own_chef.x, own_chef.y),
                             contain_b_cooked_cookable_container
                         )
@@ -1477,6 +1481,76 @@ class Agent():
                                     game_constants.ACTION_PUT,
                                     nearest_path['direction']
                                 )
+
+            elif action == constants.ACTION_SUBMIT_MIX:
+                if not own_chef.held_item:
+                    # Get plate that contains mix
+                    contain_mix_plates = list(filter(
+                        lambda plate: len(plate.contents == 2) and plate.is_clean,
+                        game_info['plates'] 
+                    ))
+                    nearest_path = self.__get_nearest_path(
+                        game_info['map'],
+                        (own_chef.x, own_chef.y),
+                        list(map(lambda plate: (plate.x, plate.y), contain_mix_plates))
+                    )
+                    if nearest_path:
+                        if nearest_path['distance'] == 0:
+                            return "%s %s" % (
+                                game_constants.ACTION_PICK,
+                                nearest_path['direction']
+                            )
+                else:
+                    # Submit plate that contains mix
+                    if isinstance(own_chef.held_item, Plate):
+                        if len(own_chef.held_item.contents) == 2 and \
+                                own_chef.held_item.is_clean:
+                            nearest_path = self.__get_nearest_path(
+                                game_info['map'],
+                                (own_chef.x, own_chef.y),
+                                submission_counter_positions
+                            )
+                            if nearest_path:
+                                if nearest_path['distance'] = =0:
+                                    return "%s %s" % (
+                                        game_constants.ACTION_PUT,
+                                        nearest_path['direction']
+                                    )
+
+            elif action == constants.ACTION_SUBMIT_B:
+                if not own_chef.held_item:
+                    # Get plate that contains b
+                    contain_b_plates = list(filter(
+                        lambda plate: len(plate.contents == 1) and plate.is_clean,
+                        game_info['plates'] 
+                    ))
+                    nearest_path = self.__get_nearest_path(
+                        game_info['map'],
+                        (own_chef.x, own_chef.y),
+                        list(map(lambda plate: (plate.x, plate.y), contain_b_plates))
+                    )
+                    if nearest_path:
+                        if nearest_path['distance'] == 0:
+                            return "%s %s" % (
+                                game_constants.ACTION_PICK,
+                                nearest_path['direction']
+                            )
+                else:
+                    # Submit plate that contains b
+                    if isinstance(own_chef.held_item, Plate):
+                        if len(own_chef.held_item.contents) == 1 and \
+                                own_chef.held_item.is_clean:
+                            nearest_path = self.__get_nearest_path(
+                                game_info['map'],
+                                (own_chef.x, own_chef.y),
+                                submission_counter_positions
+                            )
+                            if nearest_path:
+                                if nearest_path['distance'] = =0:
+                                    return "%s %s" % (
+                                        game_constants.ACTION_PUT,
+                                        nearest_path['direction']
+                                    )
 
         if nearest_path:
             return "%s %s" % (
