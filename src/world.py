@@ -33,12 +33,13 @@ class World():
         self.cookable_containers = []
         self.mixers = []
         self.stoves = []
-        self.sink = None
         self.cutting_boards = []
         self.ingredient_boxes = []
         self.ingredients = []
         self.possible_orders = []
         self.current_orders = []
+        self.sink = None
+        self.garbage_bin = None
         self.return_counter = None
         self.obtained_reward = 0
         self.remaining_time = constants.TIME_GIVEN
@@ -84,7 +85,8 @@ class World():
                             elif char == 'S':
                                 self.map[row][col].content = SubmissionCounter(self)
                             elif char == 'G':
-                                self.map[row][col].content = GarbageBin()
+                                self.map[row][col].content = GarbageBin(x=col, y=row)
+                                self.garbage_bin = self.map[row][col].content
                             elif char == 'M':
                                 self.map[row][col].content = Mixer(x=col, y=row)
                                 self.map[row][col].content.content = Bowl(
@@ -428,6 +430,7 @@ class World():
         game_info['plates'] = self.plates
         game_info['return_counter'] = self.return_counter
         game_info['sink'] = self.sink
+        game_info['garbage_bin'] = self.garbage_bin
 
         return game_info
 
