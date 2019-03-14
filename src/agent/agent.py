@@ -1746,6 +1746,43 @@ class Agent():
                                     nearest_path['direction']
                                 )
 
+            elif action == constants.ACTION_PUT_ASIDE_CLEAN_PLATE:
+                if not own_chef.held_item:
+                    # Get clean plate from passing table
+                    on_passing_table_clean_plate = list(filter(
+                        lambda plate: plate.x == game_constants.PASSING_TABLE_X and \
+                            plate.is_clean,
+                        game_info['plates']
+                    ))
+                    nearest_path = self.__get_nearest_path(
+                        game_info['map'],
+                        (own_chef.x, own_chef.y),
+                        list(map(
+                            lambda plate: (plate.x, plate.y),
+                            on_passing_table_clean_plate
+                        ))
+                    )
+                    if nearest_path:
+                        if nearest_path['distance'] == 0:
+                            return "%s %s" % (
+                                game_constants.ACTION_PICK,
+                                nearest_path['direction']
+                            )
+                else:
+                    if isinstance(own_chef.held_item, Plate):
+                        if len(own_chef.held_item.contents) == 0 and \
+                                own_chef.held_item.is_clean:
+                            nearest_path = self.__get_nearest_path(
+                                game_info['map'],
+                                (own_chef.x, own_chef.y),
+                                empty_right_side_table_positions
+                            )
+                            if nearest_path:
+                                if nearest_path['distance'] == 0:
+                                    return "%s %s" % (
+                                        game_constants.ACTION_PUT,
+                                        nearest_path['direction']
+                                    )
 
         if nearest_path:
             return "%s %s" % (
