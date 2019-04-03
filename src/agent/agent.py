@@ -554,7 +554,7 @@ class Agent():
         if self.__side == constants.SIDE_LEFT:
             on_cutting_board_a_ingredients = []
             for cutting_board in game_info['cutting_boards']:        
-                on_cutting_board_b_ingredients += list(filter(
+                on_cutting_board_a_ingredients += list(filter(
                     lambda ingredient: ingredient.x == cutting_board.x and \
                         ingredient.y == cutting_board.y and ingredient.name == \
                         game_constants.INGREDIENT_A_NAME,
@@ -1111,7 +1111,7 @@ class Agent():
                                         nearest_path['direction']
                                     )
             
-            elif action == constants.THROW_AWAY_A:
+            elif action == constants.ACTION_THROW_AWAY_A:
                 if not own_chef.held_item:
                     # Get unprogressed a
                     unprogressed_a_ingredients = list(filter(
@@ -1147,7 +1147,7 @@ class Agent():
                                         nearest_path['direction']
                                     )
             
-            elif action == constants.THROW_AWAY_C:
+            elif action == constants.ACTION_THROW_AWAY_C:
                 if not own_chef.held_item:
                     # Get c from passing table
                     left_side_c = list(filter(
@@ -1221,7 +1221,7 @@ class Agent():
             right_side_empty_clean_plate_positions = list(map(
                 lambda plate: (plate.x, plate.y),
                 list(filter(
-                    lambda plate: len(plate.contents) == 0 and plate.is_clean and \
+                    lambda plate: len(plate.contents) == 0 and not plate.is_dirty and \
                         plate.x >= constants.PASSING_TABLE_X ,
                     game_info['plates']                       
                 ))
@@ -1422,7 +1422,7 @@ class Agent():
                     # Get mixed bowl
                     else:
                         right_side_mixed_bowls = list(filter(
-                            lambda bowl: bowl.is_mixed and \ 
+                            lambda bowl: bowl.is_mixed and \
                                 bowl.x >= constants.PASSING_TABLE_X,
                             game_info['bowls']
                         ))
@@ -1534,7 +1534,7 @@ class Agent():
                                 nearest_path['direction']
                             )
             
-            elif action == consants.ACTION_PLATE_MIX:
+            elif action == constants.ACTION_PLATE_MIX:
                 if not own_chef.held_item:
                     # Get empty clean plate
                     nearest_path = self.__get_nearest_path(
@@ -1587,7 +1587,8 @@ class Agent():
                     if isinstance(own_chef.held_item, Plate):
                         contain_b_cooked_cookable_container = list(filter(
                             lambda cookable_container: cookable_container.is_cooked and \
-                                len(cookable_container.contents) == 1
+                                len(cookable_container.contents) == 1,
+                            game_info['cookable_containers']
                         ))
                         nearest_path = self.__get_nearest_path(
                             game_info['map'],
@@ -1605,7 +1606,7 @@ class Agent():
                 if not own_chef.held_item:
                     # Get plate that contains mix
                     contain_mix_plates = list(filter(
-                        lambda plate: len(plate.contents == 2) and plate.is_clean,
+                        lambda plate: len(plate.contents) == 2 and not plate.is_dirty,
                         game_info['plates'] 
                     ))
                     nearest_path = self.__get_nearest_path(
@@ -1623,14 +1624,14 @@ class Agent():
                     # Submit plate that contains mix
                     if isinstance(own_chef.held_item, Plate):
                         if len(own_chef.held_item.contents) == 2 and \
-                                own_chef.held_item.is_clean:
+                                not own_chef.held_item.is_dirty:
                             nearest_path = self.__get_nearest_path(
                                 game_info['map'],
                                 (own_chef.x, own_chef.y),
                                 submission_counter_positions
                             )
                             if nearest_path:
-                                if nearest_path['distance'] = =0:
+                                if nearest_path['distance'] == 0:
                                     return "%s %s" % (
                                         game_constants.ACTION_PUT,
                                         nearest_path['direction']
@@ -1640,7 +1641,7 @@ class Agent():
                 if not own_chef.held_item:
                     # Get plate that contains b
                     contain_b_plates = list(filter(
-                        lambda plate: len(plate.contents == 1) and plate.is_clean,
+                        lambda plate: len(plate.contents) == 1 and not plate.is_dirty,
                         game_info['plates'] 
                     ))
                     nearest_path = self.__get_nearest_path(
@@ -1658,14 +1659,14 @@ class Agent():
                     # Submit plate that contains b
                     if isinstance(own_chef.held_item, Plate):
                         if len(own_chef.held_item.contents) == 1 and \
-                                own_chef.held_item.is_clean:
+                                not own_chef.held_item.is_dirty:
                             nearest_path = self.__get_nearest_path(
                                 game_info['map'],
                                 (own_chef.x, own_chef.y),
                                 submission_counter_positions
                             )
                             if nearest_path:
-                                if nearest_path['distance'] = =0:
+                                if nearest_path['distance'] == 0:
                                     return "%s %s" % (
                                         game_constants.ACTION_PUT,
                                         nearest_path['direction']
@@ -1721,7 +1722,7 @@ class Agent():
                         list(map(lambda bowl: (bowl.x, bowl.y), on_passing_table_mixed_bowl))
                     )
                     if nearest_path:
-                        if nearest_path['distance'] = =0:
+                        if nearest_path['distance'] == 0:
                             return "%s %s" % (
                                 game_constants.ACTION_PICK,
                                 nearest_path['direction']
@@ -1757,7 +1758,7 @@ class Agent():
                                     cookable_container.y
                                 ),
                                 list(filter(
-                                    lambda cookable_container: cookable.container.progress == \
+                                    lambda cookable_container: cookable_container.progress == \
                                         max_progress,
                                     on_stove_cookable_containers
                                 ))
@@ -1787,7 +1788,7 @@ class Agent():
             elif action == constants.ACTION_PUT_ASIDE_PLATED_MIX:
                 if isinstance(own_chef.held_item, Plate):
                     if len(own_chef.held_item.contents) == 2 and \
-                            own_chef.held_item.is_clean:
+                            not own_chef.held_item.is_dirty:
                         nearest_path = self.__get_nearest_path(
                             game_info['map'],
                             (own_chef.x, own_chef.y),
@@ -1803,7 +1804,7 @@ class Agent():
             elif action == constants.ACTION_PUT_ASIDE_PLATED_B:
                 if isinstance(own_chef.held_item, Plate):
                      if len(own_chef.held_item.contents) == 1 and \
-                            own_chef.held_item.is_clean:
+                            not own_chef.held_item.is_dirty:
                         nearest_path = self.__get_nearest_path(
                             game_info['map'],
                             (own_chef.x, own_chef.y),
@@ -1820,8 +1821,8 @@ class Agent():
                 if not own_chef.held_item:
                     # Get clean plate from passing table
                     on_passing_table_clean_plate = list(filter(
-                        lambda plate: plate.x == game_constants.PASSING_TABLE_X and \
-                            plate.is_clean,
+                        lambda plate: plate.x == constants.PASSING_TABLE_X and \
+                            not plate.is_dirty,
                         game_info['plates']
                     ))
                     nearest_path = self.__get_nearest_path(
@@ -1841,7 +1842,7 @@ class Agent():
                 else:
                     if isinstance(own_chef.held_item, Plate):
                         if len(own_chef.held_item.contents) == 0 and \
-                                own_chef.held_item.is_clean:
+                                not own_chef.held_item.is_dirty:
                             nearest_path = self.__get_nearest_path(
                                 game_info['map'],
                                 (own_chef.x, own_chef.y),
@@ -1854,7 +1855,7 @@ class Agent():
                                         nearest_path['direction']
                                     )
 
-            elif action == constants.THROW_AWAY_B:
+            elif action == constants.ACTION_THROW_AWAY_B:
                 if not own_chef.held_item:
                     # Get unprogressed b
                     unprogressed_b_ingredients = list(filter(
@@ -1890,7 +1891,7 @@ class Agent():
                                         nearest_path['direction']
                                     )
             
-            elif action == constants.THROW_AWAY_C:
+            elif action == constants.ACTION_THROW_AWAY_C:
                 if not own_chef.held_item:
                     # Get c from passing table
                     on_passing_table_c = list(filter(

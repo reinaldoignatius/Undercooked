@@ -36,6 +36,7 @@ class World():
         self.cutting_boards = []
         self.ingredient_boxes = []
         self.ingredients = []
+        self.submission_counters = []
         self.possible_orders = []
         self.current_orders = []
         self.sink = None
@@ -83,7 +84,12 @@ class World():
                                 self.return_counter = ReturnCounter(x=col, y=row)
                                 self.map[row][col].content = self.return_counter
                             elif char == 'S':
-                                self.map[row][col].content = SubmissionCounter(self)
+                                self.map[row][col].content = SubmissionCounter(
+                                    world=self,
+                                    x=col,
+                                    y=row
+                                )
+                                self.submission_counters.append(self.map[row][col].content)
                             elif char == 'G':
                                 self.map[row][col].content = GarbageBin(x=col, y=row)
                                 self.garbage_bin = self.map[row][col].content
@@ -429,6 +435,7 @@ class World():
         game_info['ingredients'] = self.ingredients
         game_info['plates'] = self.plates
         game_info['return_counter'] = self.return_counter
+        game_info['submission_counters'] = self.submission_counters
         game_info['sink'] = self.sink
         game_info['garbage_bin'] = self.garbage_bin
 

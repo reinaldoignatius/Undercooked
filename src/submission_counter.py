@@ -3,8 +3,10 @@ import constants
 from plate import Plate
 
 class SubmissionCounter():
-    def __init__(self, world):
+    def __init__(self, world, x, y):
         self.__world = world
+        self.x = x
+        self.y = y
 
     def put_on_chef_held_item(self, chef):
         if isinstance(chef.held_item, Plate):
