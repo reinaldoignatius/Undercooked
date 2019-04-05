@@ -44,6 +44,7 @@ class World():
         self.return_counter = None
         self.obtained_reward = 0
         self.remaining_time = constants.TIME_GIVEN
+        self.is_done = False
 
         self.__time_between_orders = 0
         self.__time_until_next_order = 0
@@ -94,7 +95,7 @@ class World():
                                 self.map[row][col].content = GarbageBin(x=col, y=row)
                                 self.garbage_bin = self.map[row][col].content
                             elif char == 'M':
-                                self.map[row][col].content = Mixer(x=col, y=row)
+                                self.map[row][col].content = Mixer(x=col, y=row, world=self)
                                 self.map[row][col].content.content = Bowl(
                                     id=self.__current_bowl_id,
                                     x=col,
@@ -104,7 +105,7 @@ class World():
                                 self.bowls.append(self.map[row][col].content.content)
                                 self.__current_bowl_id = ')'
                             elif char == 'O':
-                                self.map[row][col].content = Stove(x=col, y=row)
+                                self.map[row][col].content = Stove(x=col, y=row, world=self)
                                 self.map[row][col].content.content = CookableContainer(
                                     id=self.__current_cookable_container_id,
                                     x=col,
@@ -150,7 +151,7 @@ class World():
             order_dict = json.load(infile)
             self.possible_orders = [order for order in order_dict['orders']]
             self.__time_between_orders = order_dict['time_between_orders']
-            self.__time_until_next_order = self.__time_between_orders / 3
+            self.__time_until_next_order = self.__time_between_orders / 2
 
         self.__create_order()
 
@@ -357,7 +358,7 @@ class World():
                     self.map[chef.y + 1][chef.x].content and \
                     not isinstance(self.map[chef.y + 1][chef.x].content, Wall):
                 self.map[chef.y + 1][chef.x].content.put_on_chef_held_item(chef)
-            elif direction == constants.DIRECTION_LOWER_LEFT and \
+            elif direction == constants.DIRECTION_LOWER_RIGHT and \
                     self.map[chef.y + 1][chef. x - 1].content and \
                     not isinstance(self.map[chef.y + 1][chef.x - 1].content, Wall):
                 self.map[chef.y + 1][chef.x - 1].content.put_on_chef_held_item(chef)
@@ -386,8 +387,7 @@ class World():
         for current_order in self.current_orders:
             current_order.remaining_time -= 1
             if current_order.remaining_time == 0:
-                self.obtained_reward -= constants.PENALTY
-                current_order.remaining_time = current_order.allocated_time
+                self.is_done = True
         for plate in self.plates:
             if plate.is_dirty and plate.time_until_respawn > 0:
                 plate.time_until_respawn -= 1
@@ -415,31 +415,31 @@ class World():
                     self.obtained_reward += current_order.maximum_reward / 3
         if match_idx != -1:
             self.current_orders.pop(match_idx)
+        else:
+            self.is_done = True
 
 
     def get_all_game_info(self):
-        game_info = {}
-        
-        game_info['map'] = self.map
-        game_info['obtained_reward'] = self.obtained_reward
-        game_info['remaining_time'] = self.remaining_time
-        game_info['current_orders'] = self.current_orders
-        game_info['chefs'] = self.chefs
-        game_info['tables'] = self.tables
-        game_info['bowls'] = self.bowls
-        game_info['mixers'] = self.mixers
-        game_info['cookable_containers'] = self.cookable_containers
-        game_info['stoves'] = self.stoves
-        game_info['cutting_boards'] = self.cutting_boards
-        game_info['ingredient_boxes'] = self.ingredient_boxes
-        game_info['ingredients'] = self.ingredients
-        game_info['plates'] = self.plates
-        game_info['return_counter'] = self.return_counter
-        game_info['submission_counters'] = self.submission_counters
-        game_info['sink'] = self.sink
-        game_info['garbage_bin'] = self.garbage_bin
-
-        return game_info
+        return {
+          'map': self.map,
+          'obtained_reward': self.obtained_reward,
+          'remaining_time': self.remaining_time,
+          'current_orders': self.current_orders,
+          'chefs': self.chefs,
+          'tables': self.tables,
+          'bowls': self.bowls,
+          'mixers': self.mixers,
+          'cookable_containers': self.cookable_containers,
+          'stoves': self.stoves,
+          'cutting_boards': self.cutting_boards,
+          'ingredient_boxes': self.ingredient_boxes,
+          'ingredients': self.ingredients,
+          'plates': self.plates,
+          'return_counter': self.return_counter,
+          'submission_counters': self.submission_counters,
+          'sink': self.sink,
+          'garbage_bin': self.garbage_bin
+        }
 
 
     def print_current_map(self):
