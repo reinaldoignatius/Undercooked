@@ -3,8 +3,6 @@ import math
 import copy
 import numpy as np
 from collections import deque
-import tensorflow as tf
-from keras import backend as K
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
@@ -17,18 +15,17 @@ from cookable_container import CookableContainer
 
 class Agent():
 
-    def __init__(self, name, side, graph):
+    def __init__(self, name, side):
         self.__side = side
 
-        with graph.as_default():
-            self.__model = Sequential()
-            self.__model.add(Dense(53, input_dim=constants.STATE_SIZE, activation='relu'))
-            self.__model.add(Dense(
-                len(constants.LEFT_SIDE_ACTION_CHOICES) if self.__side == constants.SIDE_LEFT 
-                    else len(constants.RIGHT_SIDE_ACTION_CHOICES), 
-                activation='linear'
-            ))
-            self.__model.compile(loss='mse', optimizer=Adam(lr=constants.LEARNING_RATE))
+        self.__model = Sequential()
+        self.__model.add(Dense(53, input_dim=constants.STATE_SIZE, activation='relu'))
+        self.__model.add(Dense(
+            len(constants.LEFT_SIDE_ACTION_CHOICES) if self.__side == constants.SIDE_LEFT 
+                else len(constants.RIGHT_SIDE_ACTION_CHOICES), 
+            activation='linear'
+        ))
+        self.__model.compile(loss='mse', optimizer=Adam(lr=constants.LEARNING_RATE))
 
         self.name = name
 
@@ -2030,8 +2027,13 @@ class Agent():
     
 
     def load(self, episode):
-        self.__model.load_weights('%s_%d.hdf5' % (self.name, episode))
+        self.__model.save_weights()
+        self.__model.load_weights('src/agent/%s_%d.hdf5' % (self.name, episode))
 
     
     def save(self, episode):
-        self.__model.save_weights('%s_%d.hdf5' % (self.name, episode))
+        self.__model.save_weights('src/agent/%s_%d.hdf5' % (self.name, episode))
+
+    def print_model_weights(self):
+        for layer in self.__model.layers:
+            print(layer.get_weights())
