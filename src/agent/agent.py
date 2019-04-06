@@ -701,6 +701,18 @@ class Agent():
                     lambda bowl: bowl.x <= constants.PASSING_TABLE_X, 
                     self.current_game_info['bowls']
                 ))
+                cut_a_ingredients = list(filter(
+                    lambda ingredient: \
+                        ingredient.name == game_constants.INGREDIENT_A_NAME and \
+                        ingredient.processes_done,
+                    unbound_ingredients
+                ))
+                left_side_c_ingredients = list(filter(
+                    lambda ingredient: \
+                        ingredient.name == game_constants.INGREDIENT_C_NAME and \
+                        ingredient.x <= constants.PASSING_TABLE_X,
+                    unbound_ingredients
+                ))
                 if not own_chef.held_item:
                     not_mixed_full_bowls = list(filter(
                         lambda bowl: len(bowl.contents) == 2 and not bowl.is_mixed and \
@@ -745,18 +757,6 @@ class Agent():
                                 candidate_bowls
                             ))
                             candidate_destinations = []
-                            cut_a_ingredients = list(filter(
-                                lambda ingredient: \
-                                    ingredient.name == game_constants.INGREDIENT_A_NAME and \
-                                    ingredient.processes_done,
-                                unbound_ingredients
-                            ))
-                            left_side_c_ingredients = list(filter(
-                                lambda ingredient: \
-                                    ingredient.name == game_constants.INGREDIENT_C_NAME and \
-                                    ingredient.x < constants.PASSING_TABLE_X,
-                                unbound_ingredients
-                            ))
                             if one_content_candidate_bowls:
                                 contain_a_candidate_bowls = list(filter(
                                     lambda candidate_bowl: candidate_bowl.contents[0].name == \
@@ -770,19 +770,20 @@ class Agent():
                                 ))
                                 if contain_a_candidate_bowls:
                                     candidate_destinations += list(map(
-                                        lambda a: (a.x, a.y), 
-                                        cut_a_ingredients
+                                        lambda c: (c.x, c.y),
+                                        left_side_c_ingredients, 
                                     ))
                                 if contain_c_candidate_bowls:
                                     candidate_destinations += list(map(
-                                        lambda c: (c.x, c.y),
-                                        left_side_c_ingredients
+                                        lambda a: (a.x, a.y),
+                                        cut_a_ingredients
                                     ))
                             else:
-                                candidate_destinations = list(map(
-                                    lambda ingredient: (ingredient.x, ingredient.y),
-                                    cut_a_ingredients + left_side_c_ingredients
-                                ))
+                                if cut_a_ingredients and left_side_c_ingredients:
+                                    candidate_destinations = list(map(
+                                        lambda ingredient: (ingredient.x, ingredient.y),
+                                        cut_a_ingredients + left_side_c_ingredients
+                                    ))
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
@@ -837,7 +838,7 @@ class Agent():
                                         ))
                                     ))
                                 )
-                            else:
+                            elif left_side_c_ingredients:
                                 nearest_path = self.__get_nearest_path(
                                     self.current_game_info['map'],
                                     (own_chef.x, own_chef.y),
@@ -868,7 +869,7 @@ class Agent():
                                         ))
                                     ))
                                 )
-                            else:
+                            elif cut_a_ingredients:
                                 nearest_path = self.__get_nearest_path(
                                     self.current_game_info['map'],
                                     (own_chef.x, own_chef.y),
@@ -1374,20 +1375,42 @@ class Agent():
             elif action == constants.ACTION_PASS_C:
                 if not own_chef.held_item:
                     # Get c
-                    nearest_path = self.__a_star(
-                        self.current_game_info['map'],
-                        (own_chef.x, own_chef.y),
-                        (
-                            ingredient_boxes[game_constants.INGREDIENT_C_NAME].x,
-                            ingredient_boxes[game_constants.INGREDIENT_C_NAME].y
+                    right_side_c_ingredients = list(filter(
+                        lambda ingredient: \
+                            ingredient.name == game_constants.INGREDIENT_C_NAME and \
+                            ingredient.x > constants.PASSING_TABLE_X,
+                        unbound_ingredients
+                    ))
+                    if right_side_c_ingredients:
+                        nearest_path = self.__get_nearest_path(
+                            self.current_game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            list(map(
+                                lambda c: (c.x, c.y),
+                                right_side_c_ingredients
+                            ))
                         )
-                    )
-                    if nearest_path:
-                        if nearest_path['distance'] == 0:
-                            return "%s %s" % (
-                                game_constants.ACTION_USE,
-                                nearest_path['direction']
+                        if nearest_path:
+                            if nearest_path['distance'] == 0:
+                                return "%s %s" % (
+                                    game_constants.ACTION_PICK,
+                                    nearest_path['direction']
+                                )
+                    else:
+                        nearest_path = self.__a_star(
+                            self.current_game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            (
+                                ingredient_boxes[game_constants.INGREDIENT_C_NAME].x,
+                                ingredient_boxes[game_constants.INGREDIENT_C_NAME].y
                             )
+                        )
+                        if nearest_path:
+                            if nearest_path['distance'] == 0:
+                                return "%s %s" % (
+                                    game_constants.ACTION_USE,
+                                    nearest_path['direction']
+                                )
                 else:
                     # Pass c
                     if isinstance(own_chef.held_item, Ingredient):

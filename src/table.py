@@ -7,7 +7,7 @@ class Table():
         self.y = y
 
     def put_on_chef_held_item(self, chef):
-        if self.content:
+        if self.content and hasattr(self.content, 'put_on_chef_held_item'):
             self.content.put_on_chef_held_item(chef)
         else:
             self.content = chef.held_item

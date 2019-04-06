@@ -119,6 +119,7 @@ def finish_handler(agent, game_info):
 
     if len(agent.agent.memory) > agent_constants.BATCH_SIZE:
         agent.agent.replay(agent_constants.BATCH_SIZE)
+        agent.log_info('Replayed memory')
 
 def save_handler(agent, episode):
     agent.agent.save(episode)
@@ -182,7 +183,7 @@ if __name__ == '__main__':
 
         while not world.is_done:
             # os.system('clear')
-            # world.print_all_game_info()
+            world.print_all_game_info()
             undercooked.world = world
             undercooked.send(UNDERCOOKED_ALIAS, world.get_all_game_info())
             time.sleep(0.5)

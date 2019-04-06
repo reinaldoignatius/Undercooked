@@ -332,36 +332,36 @@ class World():
         if chef.held_item:
             if direction == constants.DIRECTION_UPPER_LEFT and \
                     self.map[chef.y - 1][chef. x - 1].content and \
-                    not isinstance(self.map[chef.y - 1][chef.x - 1].content, Wall):
+                    hasattr(self.map[chef.y - 1][chef.x - 1].content, 'put_on_chef_held_item'):
                 self.map[chef.y - 1][chef.x - 1].content.put_on_chef_held_item(chef)
             elif direction == constants.DIRECTION_UP and \
                     self.map[chef.y - 1][chef.x].content and \
-                    not isinstance(self.map[chef.y - 1][chef.x].content, Wall):
+                    hasattr(self.map[chef.y - 1][chef.x].content, 'put_on_chef_held_item'):
                 self.map[chef.y - 1][chef.x].content.put_on_chef_held_item(chef)
             elif direction == constants.DIRECTION_UPPER_RIGHT and \
                     self.map[chef.y - 1][chef. x + 1].content and \
-                    not isinstance(self.map[chef.y - 1][chef.x + 1].content, Wall):
+                    hasattr(self.map[chef.y - 1][chef.x + 1].content, 'put_on_chef_held_item'):
                 self.map[chef.y - 1][chef.x + 1].content.put_on_chef_held_item(chef)
             elif direction == constants.DIRECTION_LEFT and \
                     self.map[chef.y][chef.x - 1].content and \
-                    not isinstance(self.map[chef.y][chef.x - 1].content, Wall):
+                    hasattr(self.map[chef.y][chef.x - 1].content, 'put_on_chef_held_item'):
                 self.map[chef.y][chef.x - 1].content.put_on_chef_held_item(chef)
             elif direction == constants.DIRECTION_RIGHT and \
                     self.map[chef.y][chef.x + 1].content and \
-                    not isinstance(self.map[chef.y][chef.x + 1].content, Wall):
+                    hasattr(self.map[chef.y][chef.x + 1].content, 'put_on_chef_held_item'):
                 self.map[chef.y][chef.x + 1].content.put_on_chef_held_item(chef)
             elif direction == constants.DIRECTION_LOWER_LEFT and \
                     self.map[chef.y + 1][chef. x - 1].content and \
-                    not isinstance(self.map[chef.y + 1][chef.x - 1].content, Wall):
+                    hasattr(self.map[chef.y + 1][chef.x - 1].content, 'put_on_chef_held_item'):
                 self.map[chef.y + 1][chef.x - 1].content.put_on_chef_held_item(chef)
             elif direction == constants.DIRECTION_DOWN and \
                     self.map[chef.y + 1][chef.x].content and \
-                    not isinstance(self.map[chef.y + 1][chef.x].content, Wall):
+                    hasattr(self.map[chef.y + 1][chef.x].content, 'put_on_chef_held_item'):
                 self.map[chef.y + 1][chef.x].content.put_on_chef_held_item(chef)
             elif direction == constants.DIRECTION_LOWER_RIGHT and \
-                    self.map[chef.y + 1][chef. x - 1].content and \
-                    not isinstance(self.map[chef.y + 1][chef.x - 1].content, Wall):
-                self.map[chef.y + 1][chef.x - 1].content.put_on_chef_held_item(chef)
+                    self.map[chef.y + 1][chef. x + 1].content and \
+                    hasattr(self.map[chef.y + 1][chef.x + 1].content, 'put_on_chef_held_item'):
+                self.map[chef.y + 1][chef.x + 1].content.put_on_chef_held_item(chef)
 
 
     def handle_action(self, agent, action):
