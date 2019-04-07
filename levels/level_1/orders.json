@@ -19,9 +19,23 @@
                     ]
                 }
             ],
-            "allocated_time": 350,
-            "maximum_reward": 120
+            "allocated_time": 480,
+            "maximum_reward": 270
+        },
+        {
+            "name": "b",
+            "required_ingredients": [
+                {
+                    "name": "b",
+                    "required_processes": [
+                        "cut",
+                        "cooked"
+                    ]
+                }
+            ],
+            "allocated_time": 320,
+            "maximum_reward": 180
         }
     ],
-    "time_between_orders": 175
+    "time_between_orders": 200
 }

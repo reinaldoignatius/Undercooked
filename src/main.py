@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 
 from osbrain import run_nameserver
@@ -7,6 +8,7 @@ from osbrain import run_agent
 from world import World
 from blackboard_system import BlackboardSystem
 from agent.agent import Agent
+from agent.greedy_agent import Agent as GreedyAgent
 from agent import constants as agent_constants
 
 UNDERCOOKED_ALIAS = 'undercooked'
@@ -25,10 +27,20 @@ MESSAGE_TYPE_READ = 'read'
 MESSAGE_TYPE_WRITE = 'write'
 
 def init_handler(agent, __):
-    agent.agent = Agent(agent.name, agent_constants.SIDE_LEFT if \
-        agent.name[-1:] == '1' or agent.name[-1:] == '3' else \
-        agent_constants.SIDE_RIGHT)
-    agent.log_info('Agent initiated')
+    using_greedy = False
+    if len(sys.argv) > 1:
+        if sys.argv[1] == 'greedy':
+            using_greedy = True
+    if using_greedy:
+        agent.agent = GreedyAgent(agent.name, agent_constants.SIDE_LEFT if \
+            agent.name[-1:] == '1' or agent.name[-1:] == '3' else \
+            agent_constants.SIDE_RIGHT)
+        agent.log_info('Greedy agent initiated')
+    else:
+        agent.agent = Agent(agent.name, agent_constants.SIDE_LEFT if \
+            agent.name[-1:] == '1' or agent.name[-1:] == '3' else \
+            agent_constants.SIDE_RIGHT)
+        agent.log_info('Learning agent initiated')
 
 def chef_handler(agent, game_info):
     agent.log_info('Received game info, requesting blackboard writings')
@@ -38,6 +50,7 @@ def chef_handler(agent, game_info):
         'type': MESSAGE_TYPE_READ
     })
     blackboard_recent_writings = agent.recv('blackboard')
+    agent.log_info('Received blackboard writings, choosing action')
 
     last_game_info = agent.agent.current_game_info
     last_state = agent.agent.current_state
