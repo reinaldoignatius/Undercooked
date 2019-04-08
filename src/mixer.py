@@ -20,10 +20,10 @@ class Mixer(Table):
             if self.content.contents:
                 if self.content.progress < constants.OVERMIX_TICKS:
                     self.content.progress += 1
-                    if self.content.progress == constants.MIX_TICKS:
+                    if int(self.content.progress) == constants.MIX_TICKS:
                         for ingredient in self.content.contents:
                             ingredient.processes_done.append(constants.PROCESS_MIXED)
-                        self.contentis_mixed = True
+                        self.content.is_mixed = True
                     elif self.content.progress >= constants.OVERMIX_TICKS:
                         self.__world.is_done = True
         

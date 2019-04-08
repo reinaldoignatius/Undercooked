@@ -19,8 +19,8 @@
                     ]
                 }
             ],
-            "allocated_time": 480,
-            "maximum_reward": 270
+            "allocated_time": 600,
+            "maximum_reward": 300
         },
         {
             "name": "b",
@@ -33,9 +33,9 @@
                     ]
                 }
             ],
-            "allocated_time": 320,
-            "maximum_reward": 180
+            "allocated_time": 300,
+            "maximum_reward": 150
         }
     ],
-    "time_between_orders": 200
+    "time_between_orders": 150
 }

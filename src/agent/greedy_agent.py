@@ -668,7 +668,7 @@ class Agent():
                         if nearest_path:
                             if nearest_path['distance'] == 0:
                                 return "%s %s" % (
-                                    game_constants.ACTION_PUT,
+                                    game_constants.ACTION_PICK,
                                     nearest_path['direction']
                                 )
                 else:
@@ -1326,7 +1326,13 @@ class Agent():
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
-                                contain_mix_cooked_cookable_container
+                                list(map(
+                                    lambda cookable_container: (
+                                        cookable_container.x,
+                                        cookable_container.y
+                                    ), 
+                                    contain_mix_cooked_cookable_container
+                                ))
                             )
                             if nearest_path:
                                 if nearest_path['distance'] == 0:
@@ -1361,7 +1367,13 @@ class Agent():
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
-                                contain_b_cooked_cookable_container
+                                list(map(
+                                    lambda cookable_container: (
+                                        cookable_container.x,
+                                        cookable_container.y
+                                    ),
+                                    contain_b_cooked_cookable_container
+                                ))
                             )
                             if nearest_path:
                                 if nearest_path['distance'] == 0:
@@ -1712,22 +1724,6 @@ class Agent():
             ]
 
         else:
-            if self.current_game_info['current_orders'][0].name == \
-                    game_constants.ORDER_A_NAME:
-                actions_sort_by_priority_descending = [
-                    constants.ACTION_SUBMIT_MIX,
-                    constants.ACTION_PLATE_MIX,
-                    constants.ACTION_COOK_MIXED_BOWL,
-                    constants.ACTION_PASS_C
-                ]
-            else:
-                actions_sort_by_priority_descending = [
-                    constants.ACTION_SUBMIT_B,
-                    constants.ACTION_PLATE_B,
-                    constants.ACTION_COOK_B,
-                    constants.ACTION_CUT_B
-                ]
-
             if len(right_side_clean_plates) <= 2:
                 if self.current_game_info['current_orders'][0].name == \
                         game_constants.ORDER_A_NAME:
@@ -1769,7 +1765,7 @@ class Agent():
                         constants.ACTION_PASS_DIRTY_PLATE
                     ]
                 else:
-                    [
+                    actions_sort_by_priority_descending = [
                         constants.ACTION_SUBMIT_B,
                         constants.ACTION_PLATE_B,
                         constants.ACTION_PLATE_MIX,

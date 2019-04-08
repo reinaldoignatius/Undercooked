@@ -25,12 +25,16 @@ class Container(MoveableObject, ABC):
                 held_content.x = chef.x
                 held_content.y = chef.y
         elif isinstance(chef.held_item, Ingredient):
-            # Half current progress if new ingredient is added
-            chef.held_item.x = self.x
-            chef.held_item.y = self.y
-            self.contents.append(chef.held_item)
-            chef.held_item = None
-            self.progress /= 2
+            if chef.held_item.name not in list(map(
+                lambda content: content.name,
+                self.contents
+            )):
+                # Half current progress if new ingredient is added
+                chef.held_item.x = self.x
+                chef.held_item.y = self.y
+                self.contents.append(chef.held_item)
+                chef.held_item = None
+                self.progress /= 2
     
     def move_to_new_position(self, x, y):
         super().move_to_new_position(x, y)

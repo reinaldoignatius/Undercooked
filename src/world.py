@@ -43,6 +43,7 @@ class World():
         self.garbage_bin = None
         self.return_counter = None
         self.obtained_reward = 0
+        self.reward_multiplier = 1
         self.remaining_time = constants.TIME_GIVEN
         self.is_done = False
 
@@ -151,7 +152,7 @@ class World():
             order_dict = json.load(infile)
             self.possible_orders = [order for order in order_dict['orders']]
             self.__time_between_orders = order_dict['time_between_orders']
-            self.__time_until_next_order = self.__time_between_orders / 2
+            self.__time_until_next_order = self.__time_between_orders / 3
 
         self.__create_order()
 
@@ -380,6 +381,9 @@ class World():
 
 
     def simulate(self):
+        self.remaining_time -= 1
+        if self.remaining_time <= 0:
+            self.is_done = True 
         for mixer in self.mixers:
             mixer.mix()
         for stove in self.stoves:
@@ -405,14 +409,23 @@ class World():
         for idx, current_order in enumerate(self.current_orders):
             if current_order.match(plate.contents):
                 match_idx = idx
+
                 remaining_time_percentage = current_order.remaining_time / \
                     current_order.allocated_time
-                if remaining_time_percentage >= 0.67:
-                    self.obtained_reward += current_order.maximum_reward
-                elif remaining_time_percentage >= 0.33:
-                    self.obtained_reward += 2 / 3 * current_order.maximum_reward
+                expected_reward = current_order.maximum_reward
+                if remaining_time_percentage <= 0.33:
+                    expected_reward /= 3
+                elif remaining_time_percentage <= 0.66:
+                    expected_reward *= 2 / 3
+                self.obtained_reward += expected_reward * self.reward_multiplier
+
+                if match_idx == 0:
+                    if self.reward_multiplier < constants.MAX_REWARD_MULTIPLIER:
+                        self.reward_multiplier += 1
                 else:
-                    self.obtained_reward += current_order.maximum_reward / 3
+                    self.reward_multiplier = 1
+                    
+                break
         if match_idx != -1:
             self.current_orders.pop(match_idx)
         else:
@@ -516,6 +529,7 @@ class World():
 
     
     def print_all_game_info(self):
+        print('Remaining time: ', self.remaining_time)
         self.print_current_map()
         self.print_current_orders()
         self.print_obtained_reward()

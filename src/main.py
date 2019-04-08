@@ -43,14 +43,14 @@ def init_handler(agent, __):
         agent.log_info('Learning agent initiated')
 
 def chef_handler(agent, game_info):
-    agent.log_info('Received game info, requesting blackboard writings')
+    # agent.log_info('Received game info, requesting blackboard writings')
     
     agent.send('blackboard', {
         'sender': agent.name,
         'type': MESSAGE_TYPE_READ
     })
     blackboard_recent_writings = agent.recv('blackboard')
-    agent.log_info('Received blackboard writings, choosing action')
+    # agent.log_info('Received blackboard writings, choosing action')
 
     last_game_info = agent.agent.current_game_info
     last_state = agent.agent.current_state
@@ -84,9 +84,9 @@ def chef_handler(agent, game_info):
         'plan': agent.agent.current_action
     })
     agent.recv('blackboard')
-    agent.log_info('Wrote to blackboard')
+    # agent.log_info('Wrote to blackboard')
     agent.send('undercooked', undercooked_message, handler=dummy_handler)
-    agent.log_info('Sent action to Undercooked')
+    # agent.log_info('Sent action to Undercooked')
 
 def blackboard_handler(agent, message):
     if (message['type'] == 'read'):

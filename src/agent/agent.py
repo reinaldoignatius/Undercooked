@@ -981,7 +981,7 @@ class Agent():
                         if nearest_path:
                             if nearest_path['distance'] == 0:
                                 return "%s %s" % (
-                                    game_constants.ACTION_PUT,
+                                    game_constants.ACTION_PICK,
                                     nearest_path['direction']
                                 )
                 else:
@@ -1639,7 +1639,13 @@ class Agent():
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
-                                contain_mix_cooked_cookable_container
+                                list(map(
+                                    lambda cookable_container: (
+                                        cookable_container.x,
+                                        cookable_container.y
+                                    ), 
+                                    contain_mix_cooked_cookable_container
+                                ))
                             )
                             if nearest_path:
                                 if nearest_path['distance'] == 0:
@@ -1674,7 +1680,13 @@ class Agent():
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
-                                contain_b_cooked_cookable_container
+                                list(map(
+                                    lambda cookable_container: (
+                                        cookable_container.x,
+                                        cookable_container.y
+                                    ),
+                                    contain_b_cooked_cookable_container
+                                ))
                             )
                             if nearest_path:
                                 if nearest_path['distance'] == 0:
