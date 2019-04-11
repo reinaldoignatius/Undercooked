@@ -713,7 +713,8 @@ class Agent():
                 else:
                     # Put a on side table
                     if isinstance(own_chef.held_item, Ingredient):
-                        if own_chef.held_item.name == game_constants.INGREDIENT_A_NAME:
+                        if own_chef.held_item.name == game_constants.INGREDIENT_A_NAME and \
+                                own_chef.held_item.processes_done:
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
@@ -1479,7 +1480,8 @@ class Agent():
                 else:
                     # Put b on side table
                     if isinstance(own_chef.held_item, Ingredient):
-                        if own_chef.held_item.name == game_constants.INGREDIENT_B_NAME:
+                        if own_chef.held_item.name == game_constants.INGREDIENT_B_NAME and \
+                                own_chef.held_item.processes_done:
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
