@@ -152,9 +152,10 @@ class World():
             order_dict = json.load(infile)
             self.possible_orders = [order for order in order_dict['orders']]
             self.__time_between_orders = order_dict['time_between_orders']
-            self.__time_until_next_order = self.__time_between_orders / 3
+            self.__time_until_next_order = self.__time_between_orders
 
-        self.__create_order()
+        for __ in range(constants.INITIAL_ORDER_COUNT):
+            self.__create_order()
 
 
     def __handle_move_action(self, chef, direction, distance):
@@ -398,8 +399,9 @@ class World():
                 if plate.time_until_respawn == 0:
                     self.return_counter.add_dirty_plate(plate)
 
-        self.__time_until_next_order -= 1
-        if self.__time_until_next_order <= 0:
+        if self.__time_until_next_order > 0:
+            self.__time_until_next_order -= 1
+        elif len(self.current_orders) < constants.MAX_ORDER_COUNT:
             self.__create_order()
             self.__time_until_next_order = self.__time_between_orders
 
