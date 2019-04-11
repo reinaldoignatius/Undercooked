@@ -18,8 +18,8 @@ class SubmissionCounter():
                 plate.y = -1
                 plate.is_dirty = True
                 plate.time_until_respawn = constants.PLATE_RESPAWN_TIME
-                for content in plate.contents:
-                    self.__world.ingredients.remove(content)
+                for ingredient in plate.contents:
+                    self.__world.ingredients.remove(ingredient)
                 plate.contents.clear()
 
     def print_static(self):
