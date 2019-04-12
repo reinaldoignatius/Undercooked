@@ -1,8 +1,8 @@
 from container import Container
 
 class Bowl(Container):
-    def __init__(self, id, x, y):
-        super().__init__(id, x, y)
+    def __init__(self, x, y):
+        super().__init__(x, y)
         self.is_mixed = False
 
     def put_on_chef_held_item(self, chef):
@@ -12,3 +12,6 @@ class Bowl(Container):
                 new_mixed = chef.held_item.is_mixed
                 chef.held_item.is_mixed = selfis_mixed
                 selfis_mixed = new_mixed
+
+    def print(self):
+        print('(', end='')  

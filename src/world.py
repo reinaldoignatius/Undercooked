@@ -44,7 +44,7 @@ class World():
         self.return_counter = None
         self.obtained_reward = 0
         self.reward_multiplier = 1
-        self.remaining_time = constants.TIME_GIVEN
+        self.remaining_time = 0
         self.is_done = False
 
         self.__time_between_orders = 0
@@ -93,12 +93,15 @@ class World():
                                 )
                                 self.submission_counters.append(self.map[row][col].content)
                             elif char == 'G':
-                                self.map[row][col].content = GarbageBin(x=col, y=row)
+                                self.map[row][col].content = GarbageBin(
+                                    x=col,
+                                    y=row,
+                                    world=self
+                                )
                                 self.garbage_bin = self.map[row][col].content
                             elif char == 'M':
                                 self.map[row][col].content = Mixer(x=col, y=row, world=self)
                                 self.map[row][col].content.content = Bowl(
-                                    id=self.__current_bowl_id,
                                     x=col,
                                     y=row                             
                                 )
@@ -108,7 +111,6 @@ class World():
                             elif char == 'O':
                                 self.map[row][col].content = Stove(x=col, y=row, world=self)
                                 self.map[row][col].content.content = CookableContainer(
-                                    id=self.__current_cookable_container_id,
                                     x=col,
                                     y=row
                                 )
@@ -128,31 +130,29 @@ class World():
                                 )
                                 self.ingredient_boxes.append(self.map[row][col].content)
                         
-        with open('levels/%s/pos.json' % level_name) as infile:
-            position = json.load(infile)
-            for idx, chef_position in enumerate(position['chefs']):
+        with open('levels/%s/info.json' % level_name) as infile:
+            info = json.load(infile)
+            for idx, chef_position in enumerate(info['chefs']):
                 self.map[chef_position['y']][chef_position['x']].content = Chef(
-                    self, 
-                    id=idx + 1, 
+                    self,
+                    id=idx + 1,
                     x=chef_position['x'],
                     y=chef_position['y']
                 )
                 self.chefs.append(self.map[chef_position['y']][chef_position['x']].content)
 
-            for idx, plate_position in enumerate(position.get('plates')):
+            for __, plate_position in enumerate(info.get('plates')):
                 self.map[plate_position['y']][plate_position['x']].content.content = Plate(
-                    id=idx + 5,
                     x=plate_position['x'],
                     y=plate_position['y']
                 )
                 self.plates.append(
                     self.map[plate_position['y']][plate_position['x']].content.content)
-        
-        with open('levels/%s/orders.json' % level_name) as infile:
-            order_dict = json.load(infile)
-            self.possible_orders = [order for order in order_dict['orders']]
-            self.__time_between_orders = order_dict['time_between_orders']
+
+            self.possible_orders = [order for order in info['orders']]
+            self.__time_between_orders = info['time_between_orders']
             self.__time_until_next_order = self.__time_between_orders
+            self.remaining_time =  info['time_given']
 
         for __ in range(constants.INITIAL_ORDER_COUNT):
             self.__create_order()
@@ -401,7 +401,7 @@ class World():
 
         if self.__time_until_next_order > 0:
             self.__time_until_next_order -= 1
-        elif len(self.current_orders) < constants.MAX_ORDER_COUNT:
+        elif len(self.current_orders) < constants.MAX_ORDER_COUNT or not self.current_orders:
             self.__create_order()
             self.__time_until_next_order = self.__time_between_orders
 
@@ -527,7 +527,7 @@ class World():
 
     def print_plates(self):
         for plate in self.plates:
-            print('Id: %d X: %d Y: %d Dirty: %s' % (plate.id, plate.x, plate.y, plate.is_dirty))
+            print('X: %d Y: %d Dirty: %s' % (plate.x, plate.y, plate.is_dirty))
 
     
     def print_all_game_info(self):

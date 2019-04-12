@@ -4,11 +4,10 @@ from ingredient import Ingredient
 import constants
 
 class Container(MoveableObject, ABC):
-    def __init__(self, id, x ,y):
+    def __init__(self, x ,y):
         super().__init__(x, y)
         self.contents = []
         self.progress = 0
-        self.id = id
 
     def put_on_chef_held_item(self, chef):
         if isinstance(chef.held_item, Container):
@@ -40,7 +39,4 @@ class Container(MoveableObject, ABC):
         super().move_to_new_position(x, y)
         for content in self.contents:
             content.x = self.x
-            content.y = self.y
-
-    def print(self):
-        print(self.id, end='')    
+            content.y = self.y  

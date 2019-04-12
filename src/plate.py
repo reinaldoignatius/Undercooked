@@ -4,9 +4,8 @@ from ingredient import Ingredient
 import constants
 
 class Plate(MoveableObject):
-    def __init__(self, id, x, y):
+    def __init__(self, x, y):
         super().__init__(x, y)
-        self.id = id
         self.contents = []
         self.is_dirty = False
         self.time_until_respawn = 0
@@ -24,5 +23,5 @@ class Plate(MoveableObject):
             content.move_to_new_position(x, y)
     
     def print(self):
-        print(self.id, end='')
+        print('p', end='')
     

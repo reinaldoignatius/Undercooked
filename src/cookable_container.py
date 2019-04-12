@@ -3,8 +3,8 @@ from bowl import Bowl
 from plate import Plate
 
 class CookableContainer(Container):
-    def __init__(self, id, x, y):
-        super().__init__(id, x, y)
+    def __init__(self, x, y):
+        super().__init__(x, y)
         self.is_cooked = False
     
     def put_on_chef_held_item(self, chef):
@@ -27,3 +27,6 @@ class CookableContainer(Container):
                     chef.held_item.contents.append(self.contents.pop())
                 self.progress = 0
                 self.is_cooked = False
+
+    def print(self):
+        print('[', end='')  

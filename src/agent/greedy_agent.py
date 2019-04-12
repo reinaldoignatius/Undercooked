@@ -1677,6 +1677,24 @@ class Agent():
                                         game_constants.ACTION_PUT,
                                         nearest_path['direction']
                                     )
+            
+            elif action == constants.ACTION_THROW_AWAY_C:
+                if isinstance(own_chef.held_item, Ingredient):
+                    if own_chef.held_item.name == game_constants.INGREDIENT_C_NAME:
+                        nearest_path = self.__a_star(
+                            self.current_game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            (
+                                self.current_game_info['garbage_bin'].x,
+                                self.current_game_info['garbage_bin'].y
+                            )
+                        )
+                        if nearest_path:
+                            if nearest_path['distance'] == 0:
+                                return "%s %s" % (
+                                    game_constants.ACTION_PUT,
+                                    nearest_path['direction']
+                                )
 
         if nearest_path:
             return "%s %s" % (
@@ -1800,6 +1818,7 @@ class Agent():
 
             actions_sort_by_priority_descending += [
                 constants.ACTION_PUT_ASIDE_B,
+                constants.ACTION_THROW_AWAY_C,
                 constants.ACTION_THROW_AWAY_B
             ]
 
