@@ -251,6 +251,18 @@ class Agent():
         unbound_ingredients = [ingredient for ingredient in \
             self.current_game_info['ingredients'] if ingredient not in bound_ingredients]
 
+        not_held_plates = copy.copy(self.current_game_info['plates'])
+        not_held_bowls = copy.copy(self.current_game_info['bowls'])
+        not_held_cookable_containers = copy.copy(self.current_game_info['cookable_containers'])
+        for chef in self.current_game_info['chefs']:
+            if chef.held_item:
+                if isinstance(chef.held_item, Plate):
+                    not_held_plates.remove(chef.held_item)
+                elif isinstance(chef.held_item, Bowl):
+                    not_held_bowls.remove(chef.held_item)
+                elif isinstance(chef.held_item, CookableContainer):
+                    not_held_cookable_containers.remove(chef.held_item)
+
         ingredient_boxes = {}
         for ingredient_box in self.current_game_info['ingredient_boxes']:
             ingredient_boxes[ingredient_box.name.lower()] = ingredient_box
@@ -277,7 +289,7 @@ class Agent():
             for mixer in self.current_game_info['mixers']:
                 on_mixer_bowls += list(filter(
                     lambda bowl: bowl.x == mixer.x and bowl.y == mixer.y,
-                    self.current_game_info['bowls']
+                    not_held_bowls
                 ))
             empty_left_side_table_positions = list(map(
                 lambda table: (table.x, table.y),
@@ -383,7 +395,7 @@ class Agent():
             elif action == constants.ACTION_MIX_A_AND_C:
                 left_side_bowls = list(filter(
                     lambda bowl: bowl.x <= constants.PASSING_TABLE_X, 
-                    self.current_game_info['bowls']
+                    not_held_bowls
                 ))
                 cut_a_ingredients = list(filter(
                     lambda ingredient: \
@@ -401,7 +413,7 @@ class Agent():
                     not_mixed_full_bowls = list(filter(
                         lambda bowl: len(bowl.contents) == 2 and not bowl.is_mixed and \
                             bowl.x < constants.PASSING_TABLE_X,
-                        self.current_game_info['bowls']
+                        not_held_bowls
                     ))
                     not_mixed_not_on_mixer_full_bowls = [
                         bowl for bowl in not_mixed_full_bowls if bowl not in on_mixer_bowls
@@ -571,7 +583,7 @@ class Agent():
                     # Get mixed bowl
                     unpassed_mixed_bowl = list(filter(
                         lambda bowl: bowl.x < constants.PASSING_TABLE_X and bowl.is_mixed,
-                        self.current_game_info['bowls']
+                        not_held_bowls
                     ))
                     nearest_path = self.__get_nearest_path(
                         self.current_game_info['map'],
@@ -606,7 +618,7 @@ class Agent():
                     left_side_clean_plate = list(filter(
                         lambda plate: plate.x < constants.PASSING_TABLE_X and \
                             not plate.is_dirty,
-                        self.current_game_info['plates']
+                        not_held_plates
                     ))
                     nearest_path = self.__get_nearest_path(
                         self.current_game_info['map'],
@@ -658,7 +670,7 @@ class Agent():
                         left_side_dirty_plates = list(filter(
                             lambda plate: plate.x <= constants.PASSING_TABLE_X and \
                                 plate.is_dirty,
-                            self.current_game_info['plates']
+                            not_held_plates
                         ))
                         nearest_path = self.__get_nearest_path(
                             self.current_game_info['map'],
@@ -711,7 +723,7 @@ class Agent():
                                     nearest_path['direction']
                                 )
                 else:
-                    # Put a on side table
+                    # Put cut a on side table
                     if isinstance(own_chef.held_item, Ingredient):
                         if own_chef.held_item.name == game_constants.INGREDIENT_A_NAME and \
                                 own_chef.held_item.processes_done:
@@ -805,7 +817,7 @@ class Agent():
                     # Get dirty plate from passing table
                     on_passing_table_dirty_plates = list(filter(
                         lambda plate: plate.x == constants.PASSING_TABLE_X and plate.is_dirty,
-                        self.current_game_info['plates']
+                        not_held_plates
                     ))
                     nearest_path = self.__get_nearest_path(
                         self.current_game_info['map'],
@@ -896,7 +908,7 @@ class Agent():
                                 nearest_path['direction']
                             )
                 else:
-                    # Throw aweay c
+                    # Throw away c
                     if isinstance(own_chef.held_item, Ingredient):
                         if own_chef.held_item.name == game_constants.INGREDIENT_C_NAME:
                             nearest_path = self.__a_star(
@@ -928,7 +940,7 @@ class Agent():
                 on_stove_cookable_containers += list(filter(
                     lambda cookable_container: cookable_container.x == stove.x and \
                         cookable_container.y == stove.y,
-                    self.current_game_info['cookable_containers']
+                    not_held_cookable_containers
                 ))
             empty_right_side_table_positions = list(map(
                 lambda table: (table.x, table.y),
@@ -948,7 +960,7 @@ class Agent():
                 lambda cookable_container: (cookable_container.x, cookable_container.y),
                 list(filter(
                     lambda cookable_container: not cookable_container.contents,
-                    self.current_game_info['cookable_containers']
+                    not_held_cookable_containers
                 ))
             ))
             right_side_empty_clean_plate_positions = list(map(
@@ -956,7 +968,7 @@ class Agent():
                 list(filter(
                     lambda plate: len(plate.contents) == 0 and not plate.is_dirty and \
                         plate.x >= constants.PASSING_TABLE_X ,
-                    self.current_game_info['plates']                       
+                    not_held_plates                      
                 ))
             ))
             submission_counter_positions = list(map(
@@ -1151,7 +1163,7 @@ class Agent():
                     not_cooked_contain_mix_cookable_containers = list(filter(
                         lambda cookable_container: len(cookable_container.contents) == 2 and \
                             not cookable_container.is_cooked,
-                        self.current_game_info['cookable_containers']
+                        not_held_cookable_containers
                     ))
                     not_cooked_not_on_stove_contain_mix_cookable_containers = [
                         cookable_container for cookable_container in \
@@ -1183,7 +1195,7 @@ class Agent():
                         right_side_mixed_bowls = list(filter(
                             lambda bowl: bowl.is_mixed and \
                                 bowl.x >= constants.PASSING_TABLE_X,
-                            self.current_game_info['bowls']
+                            not_held_bowls
                         ))
                         nearest_path = self.__get_nearest_path(
                             self.current_game_info['map'],
@@ -1231,7 +1243,7 @@ class Agent():
                     not_cooked_contain_b_cookable_containers = list(filter(
                         lambda cookable_container: len(cookable_container.contents) == 1 and \
                             not cookable_container.is_cooked,
-                        self.current_game_info['cookable_containers']
+                        not_held_cookable_containers
                     ))
                     not_cooked_not_on_stove_contain_b_cookable_containers = [
                         cookable_container for cookable_container in \
@@ -1305,7 +1317,7 @@ class Agent():
                 contain_mix_cooked_cookable_container = list(filter(
                     lambda cookable_container: cookable_container.is_cooked and \
                         len(cookable_container.contents) == 2,
-                    self.current_game_info['cookable_containers']
+                    not_held_cookable_containers
                 ))
                 if contain_mix_cooked_cookable_container:
                     if not own_chef.held_item:
@@ -1347,7 +1359,7 @@ class Agent():
                 contain_b_cooked_cookable_container = list(filter(
                     lambda cookable_container: cookable_container.is_cooked and \
                         len(cookable_container.contents) == 1,
-                    self.current_game_info['cookable_containers']
+                    not_held_cookable_containers
                 ))
                 if contain_b_cooked_cookable_container:
                     if not own_chef.held_item:
@@ -1390,7 +1402,7 @@ class Agent():
                     # Get plate that contains mix
                     contain_mix_plates = list(filter(
                         lambda plate: len(plate.contents) == 2 and not plate.is_dirty,
-                        self.current_game_info['plates'] 
+                        not_held_plates
                     ))
                     nearest_path = self.__get_nearest_path(
                         self.current_game_info['map'],
@@ -1425,7 +1437,7 @@ class Agent():
                     # Get plate that contains b
                     contain_b_plates = list(filter(
                         lambda plate: len(plate.contents) == 1 and not plate.is_dirty,
-                        self.current_game_info['plates'] 
+                        not_held_plates
                     ))
                     nearest_path = self.__get_nearest_path(
                         self.current_game_info['map'],
@@ -1499,7 +1511,7 @@ class Agent():
                     # Get mixed bowl from passing table
                     on_passing_table_mixed_bowl = list(filter(
                         lambda bowl: bowl.is_mixed and bowl.x == constants.PASSING_TABLE_X,
-                        self.current_game_info['bowls']
+                        not_held_bowls
                     ))
                     nearest_path = self.__get_nearest_path(
                         self.current_game_info['map'],
@@ -1607,7 +1619,7 @@ class Agent():
                     on_passing_table_clean_plate = list(filter(
                         lambda plate: plate.x == constants.PASSING_TABLE_X and \
                             not plate.is_dirty,
-                        self.current_game_info['plates']
+                        not_held_plates
                     ))
                     nearest_path = self.__get_nearest_path(
                         self.current_game_info['map'],
