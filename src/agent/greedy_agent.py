@@ -1120,7 +1120,10 @@ class Agent():
                                 nearest_path = self.__get_nearest_path(
                                     self.current_game_info['map'],
                                     (own_chef.x, own_chef.y),
-                                    on_passing_table_empty_bowl
+                                    list(map(
+                                        lambda bowl: (bowl.x, bowl.y),
+                                        on_passing_table_empty_bowl
+                                    ))
                                 )
                             else:
                                 nearest_path = self.__get_nearest_path(
