@@ -399,7 +399,7 @@ class World():
                 if plate.time_until_respawn == 0:
                     self.return_counter.add_dirty_plate(plate)
 
-        if self.__time_until_next_order > 0:
+        if self.__time_until_next_order > 0 and self.current_orders:
             self.__time_until_next_order -= 1
         elif len(self.current_orders) < constants.MAX_ORDER_COUNT or not self.current_orders:
             self.__create_order()
