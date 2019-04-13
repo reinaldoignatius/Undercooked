@@ -1336,7 +1336,8 @@ class Agent():
                     else:
                         # Plate mix
                         if isinstance(own_chef.held_item, Plate):
-                            if not own_chef.held_item.is_dirty:
+                            if not own_chef.held_item.is_dirty and \
+                                    not own_chef.held_item.contents:
                                 nearest_path = self.__get_nearest_path(
                                     self.current_game_info['map'],
                                     (own_chef.x, own_chef.y),
@@ -1378,7 +1379,8 @@ class Agent():
                     else:
                         # Plate b
                         if isinstance(own_chef.held_item, Plate):
-                            if not own_chef.held_item.is_dirty:
+                            if not own_chef.held_item.is_dirty and \
+                                    not own_chef.held_item.contents:
                                 nearest_path = self.__get_nearest_path(
                                     self.current_game_info['map'],
                                     (own_chef.x, own_chef.y),
@@ -1729,7 +1731,7 @@ class Agent():
             self.current_game_info['plates']
         ))
         if self.__side == constants.SIDE_LEFT:
-            if len(right_side_clean_plates) <= 2:
+            if len(right_side_clean_plates) < 2:
                 actions_sort_by_priority_descending = [
                     constants.ACTION_PUT_ASIDE_MIXED_BOWL,
                     constants.ACTION_PASS_CLEAN_PLATE,
@@ -1758,7 +1760,7 @@ class Agent():
             ]
 
         else:
-            if len(right_side_clean_plates) <= 2:
+            if len(right_side_clean_plates) < 2:
                 if self.current_game_info['current_orders'][0].name == \
                         game_constants.ORDER_A_NAME:
                     actions_sort_by_priority_descending = [

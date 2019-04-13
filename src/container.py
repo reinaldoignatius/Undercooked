@@ -17,20 +17,17 @@ class Container(MoveableObject, ABC):
             self.contents = new_contents
 
             for content in self.contents:
-                content.x = self.x
-                content.y = self.y
+                content.move_to_new_position(self.x, self.y)
 
             for held_content in chef.held_item.contents:
-                held_content.x = chef.x
-                held_content.y = chef.y
+                held_content.move_to_new_position(chef.x, chef.y)
         elif isinstance(chef.held_item, Ingredient):
             if chef.held_item.name not in list(map(
                 lambda content: content.name,
                 self.contents
             )):
                 # Half current progress if new ingredient is added
-                chef.held_item.x = self.x
-                chef.held_item.y = self.y
+                chef.held_item.move_to_new_position(self.x, self.y)
                 self.contents.append(chef.held_item)
                 chef.held_item = None
                 self.progress /= 2
@@ -38,5 +35,4 @@ class Container(MoveableObject, ABC):
     def move_to_new_position(self, x, y):
         super().move_to_new_position(x, y)
         for content in self.contents:
-            content.x = self.x
-            content.y = self.y  
+            content.move_to_new_position(self.x, self.y)

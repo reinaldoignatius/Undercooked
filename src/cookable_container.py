@@ -24,7 +24,9 @@ class CookableContainer(Container):
         else:
             if isinstance(chef.held_item, Plate):
                 while self.contents:
-                    chef.held_item.contents.append(self.contents.pop())
+                    content = self.contents.pop()
+                    content.move_to_new_position(chef.x, chef.y)
+                    chef.held_item.contents.append(content)
                 self.progress = 0
                 self.is_cooked = False
 

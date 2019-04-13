@@ -1649,7 +1649,8 @@ class Agent():
                     else:
                         # Plate mix
                         if isinstance(own_chef.held_item, Plate):
-                            if not own_chef.held_item.is_dirty:
+                            if not own_chef.held_item.is_dirty and \
+                                    not own_chef.held_item.contents:
                                 nearest_path = self.__get_nearest_path(
                                     self.current_game_info['map'],
                                     (own_chef.x, own_chef.y),
@@ -1691,7 +1692,8 @@ class Agent():
                     else:
                         # Plate b
                         if isinstance(own_chef.held_item, Plate):
-                            if not own_chef.held_item.is_dirty:
+                            if not own_chef.held_item.is_dirty and \
+                                    not own_chef.held_item.contents:
                                 nearest_path = self.__get_nearest_path(
                                     self.current_game_info['map'],
                                     (own_chef.x, own_chef.y),
