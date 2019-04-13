@@ -196,13 +196,14 @@ if __name__ == '__main__':
 
         while not world.is_done:
             # os.system('clear')
+            print(undercooked.is_running())
             world.print_all_game_info()
             undercooked.world = world
             undercooked.send(UNDERCOOKED_ALIAS, world.get_all_game_info())
-            time.sleep(0.4)
+            time.sleep(0.3)
             world = undercooked.world
             world.simulate()
-            time.sleep(0.1)
+            time.sleep(0.2)
 
         print('Episode: %d, Score: %d' % (
             episode,

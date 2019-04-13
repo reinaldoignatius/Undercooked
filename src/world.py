@@ -528,6 +528,11 @@ class World():
     def print_plates(self):
         for plate in self.plates:
             print('X: %d Y: %d Dirty: %s' % (plate.x, plate.y, plate.is_dirty))
+            for content in plate.contents:
+                from ingredient import Ingredient
+                if isinstance(content, Ingredient):
+                    print(content.name, end=' ')
+            print()
 
     
     def print_all_game_info(self):

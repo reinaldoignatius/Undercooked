@@ -285,12 +285,13 @@ class Agent():
                         game_constants.INGREDIENT_A_NAME,
                     unbound_ingredients
                 ))
-            on_mixer_bowls = []
-            for mixer in self.current_game_info['mixers']:
-                on_mixer_bowls += list(filter(
-                    lambda bowl: bowl.x == mixer.x and bowl.y == mixer.y,
-                    not_held_bowls
+            on_mixer_bowls = list(map(
+                lambda mixer: mixer.content,
+                list(filter(
+                    lambda mixer: mixer.content,
+                    self.current_game_info['mixers']
                 ))
+            ))
             empty_left_side_table_positions = list(map(
                 lambda table: (table.x, table.y),
                 list(filter(
@@ -934,13 +935,13 @@ class Agent():
                         game_constants.INGREDIENT_B_NAME,
                     unbound_ingredients
                 ))
-            on_stove_cookable_containers = []
-            for stove in self.current_game_info['stoves']:
-                on_stove_cookable_containers += list(filter(
-                    lambda cookable_container: cookable_container.x == stove.x and \
-                        cookable_container.y == stove.y,
-                    not_held_cookable_containers
+            on_stove_cookable_containers = list(map(
+                lambda stove: stove.content,
+                list(filter(
+                    lambda stove: stove.content,
+                    self.current_game_info['stoves']
                 ))
+            ))
             empty_right_side_table_positions = list(map(
                 lambda table: (table.x, table.y),
                 list(filter(
@@ -1225,11 +1226,12 @@ class Agent():
                 else:
                     # Put cookable container on empty stove
                     if isinstance(own_chef.held_item, CookableContainer):
-                        nearest_path = self.__get_nearest_path(
-                            self.current_game_info['map'],
-                            (own_chef.x, own_chef.y),
-                            empty_stove_positions
-                        )
+                        if not chef.held_item.is_cooked:
+                            nearest_path = self.__get_nearest_path(
+                                self.current_game_info['map'],
+                                (own_chef.x, own_chef.y),
+                                empty_stove_positions
+                            )
                     elif isinstance(own_chef.held_item, Bowl):
                         # Put bowl into cookable container
                         if own_chef.held_item.is_mixed:
@@ -1306,11 +1308,12 @@ class Agent():
                 else:
                     # Put cookable container on empty stove
                     if isinstance(own_chef.held_item, CookableContainer):
-                        nearest_path = self.__get_nearest_path(
-                            self.current_game_info['map'],
-                            (own_chef.x, own_chef.y),
-                            empty_stove_positions
-                        )
+                        if not chef.held_item.is_cooked:
+                            nearest_path = self.__get_nearest_path(
+                                self.current_game_info['map'],
+                                (own_chef.x, own_chef.y),
+                                empty_stove_positions
+                            )
                     # Put cut b into empty cookable container
                     elif isinstance(own_chef.held_item, Ingredient):
                         if own_chef.held_item.name == game_constants.INGREDIENT_B_NAME and \
@@ -1850,14 +1853,29 @@ class Agent():
                 constants.ACTION_THROW_AWAY_B
             ]
 
-        left_side_c = list(filter(
-            lambda ingredient: ingredient.name == game_constants.INGREDIENT_C_NAME and \
-                ingredient.x <= constants.PASSING_TABLE_X,
-            self.current_game_info['ingredients'] 
-        ))
         for action in actions_sort_by_priority_descending:
-            if action == constants.ACTION_PASS_C and len(left_side_c) >= 2:
-                continue
+            if action == constants.ACTION_PASS_C:
+                left_side_c = list(filter(
+                    lambda ingredient: ingredient.name == game_constants.INGREDIENT_C_NAME and \
+                        ingredient.x <= constants.PASSING_TABLE_X,
+                    self.current_game_info['ingredients'] 
+                ))
+                if len(left_side_c) >= 2:
+                    continue
+            elif action == constants.ACTION_COOK_MIXED_BOWL or \
+                    action == constants.ACTION_COOK_B:
+                on_stove_cooked_cookable_container = list(filter(
+                    lambda cookable_container: cookable_container.is_cooked,
+                    list(map(
+                        lambda stove: stove.content,
+                        list(filter(
+                            lambda stove: stove.content,
+                            self.current_game_info['stoves']
+                        ))
+                    ))
+                ))
+                if on_stove_cooked_cookable_container:
+                    continue
             self.current_action = constants.LEFT_SIDE_ACTION_CHOICES.index(action) if \
                 self.__side == constants.SIDE_LEFT else \
                 constants.RIGHT_SIDE_ACTION_CHOICES.index(action)
