@@ -411,9 +411,8 @@ class Agent():
                 ))
                 if not own_chef.held_item:
                     not_mixed_full_bowls = list(filter(
-                        lambda bowl: len(bowl.contents) == 2 and not bowl.is_mixed and \
-                            bowl.x < constants.PASSING_TABLE_X,
-                        not_held_bowls
+                        lambda bowl: len(bowl.contents) == 2 and not bowl.is_mixed,
+                        left_side_bowls
                     ))
                     not_mixed_not_on_mixer_full_bowls = [
                         bowl for bowl in not_mixed_full_bowls if bowl not in on_mixer_bowls
@@ -1112,11 +1111,23 @@ class Agent():
                     # Pass c
                     if isinstance(own_chef.held_item, Ingredient):
                         if own_chef.held_item.name == game_constants.INGREDIENT_C_NAME:
-                            nearest_path = self.__get_nearest_path(
-                                self.current_game_info['map'],
-                                (own_chef.x, own_chef.y),
-                                empty_passing_table_positions
-                            )
+                            on_passing_table_empty_bowl = list(filter(
+                                lambda bowl: not bowl.contents and \
+                                    bowl.x == constants.PASSING_TABLE_X,
+                                not_held_bowls
+                            ))
+                            if on_passing_table_empty_bowl:
+                                nearest_path = self.__get_nearest_path(
+                                    self.current_game_info['map'],
+                                    (own_chef.x, own_chef.y),
+                                    on_passing_table_empty_bowl
+                                )
+                            else:
+                                nearest_path = self.__get_nearest_path(
+                                    self.current_game_info['map'],
+                                    (own_chef.x, own_chef.y),
+                                    empty_passing_table_positions
+                                )
                             if nearest_path:
                                 if nearest_path['distance'] == 0:
                                     return "%s %s" % (
