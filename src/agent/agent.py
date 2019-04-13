@@ -1539,7 +1539,7 @@ class Agent():
                 else:
                     # Put cookable container on empty stove
                     if isinstance(own_chef.held_item, CookableContainer):
-                        if not chef.held_item.is_cooked:
+                        if not own_chef.held_item.is_cooked:
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
@@ -1621,7 +1621,7 @@ class Agent():
                 else:
                     # Put cookable container on empty stove
                     if isinstance(own_chef.held_item, CookableContainer):
-                        if not chef.held_item.is_cooked:
+                        if not own_chef.held_item.is_cooked:
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
