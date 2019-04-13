@@ -1809,8 +1809,8 @@ class Agent():
                         constants.ACTION_PLATE_B,
                         constants.ACTION_PUT_ASIDE_PLATED_B,
                         constants.ACTION_PUT_ASIDE_PLATED_MIX,
-                        constants.ACTION_PUT_ASIDE_COOKED_CONTAINER,
                         constants.ACTION_COOK_MIXED_BOWL,
+                        constants.ACTION_PUT_ASIDE_COOKED_CONTAINER,
                         constants.ACTION_PASS_C,
                         constants.ACTION_PASS_DIRTY_PLATE
                     ]
@@ -1821,8 +1821,8 @@ class Agent():
                         constants.ACTION_PLATE_MIX,
                         constants.ACTION_PUT_ASIDE_PLATED_MIX,
                         constants.ACTION_PUT_ASIDE_PLATED_B,
-                        constants.ACTION_PUT_ASIDE_COOKED_CONTAINER,
                         constants.ACTION_COOK_B,
+                        constants.ACTION_PUT_ASIDE_COOKED_CONTAINER,
                         constants.ACTION_CUT_B,
                         constants.ACTION_PASS_DIRTY_PLATE
                     ]
