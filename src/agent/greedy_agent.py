@@ -1829,7 +1829,7 @@ class Agent():
 
             actions_sort_by_priority_descending += [
                 constants.ACTION_PUT_ASIDE_B,
-                constants.ACTION_PUT_ASIDE_C
+                constants.ACTION_PUT_ASIDE_C,
                 constants.ACTION_THROW_AWAY_C,
                 constants.ACTION_THROW_AWAY_B
             ]
