@@ -5,7 +5,6 @@ from ingredient import Ingredient
 class IngredientBox(Table, UsableObect):
     def __init__(self, world, name, x, y):
         Table.__init__(self, x, y)
-        Spawner.__init__(self, x, y)
         self.world = world
         self.name = name
 
