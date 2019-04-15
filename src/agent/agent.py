@@ -73,7 +73,11 @@ class Agent():
                     else:
                         found = True
                     distance += 1
+
                 path = { 'distance': distance }
+
+                x_direction = 0
+                y_direction = 0
                 if distance > 0:
                     x_direction = current[0] - origin[0]
                     y_direction = current[1] - origin[1]
@@ -98,10 +102,8 @@ class Agent():
                 elif x_direction > 0 and y_direction > 0:
                     path['direction'] = game_constants.DIRECTION_LOWER_RIGHT
                 
-                if abs(x_direction) > 1 or abs(y_direction) > 1:
-                    path['should_dash'] = True
-                else:
-                    path['should_dash'] = False
+                path['should_dash'] = True if abs(x_direction) > 1 or \
+                    abs(y_direction) > 1 else False
                     
                 return path
             
@@ -221,7 +223,7 @@ class Agent():
                     g_score[neighbor] = g_score[current] + 1
                     f_score[neighbor] = g_score[neighbor] + \
                         (abs(destination[0] - neighbor[0]) + \
-                        abs(destination[1] - neighbor[1])) / 3
+                        abs(destination[1] - neighbor[1])) / game_constants.DASH_DISTANCE
     
 
     def __get_nearest_path(self, current_map, origin, destinations):
@@ -1200,44 +1202,6 @@ class Agent():
                                         game_constants.ACTION_PUT,
                                         nearest_path['direction']
                                     )
-            
-            elif action == constants.ACTION_THROW_AWAY_C:
-                if not own_chef.held_item:
-                    # Get c
-                    left_side_c = list(filter(
-                        lambda ingredient: ingredient.x <= constants.PASSING_TABLE_X and \
-                            ingredient.name == game_constants.INGREDIENT_C_NAME,
-                        unbound_ingredients
-                    ))
-                    nearest_path = self.__get_nearest_path(
-                        self.current_game_info['map'],
-                        (own_chef.x, own_chef.y),
-                        list(map(lambda c: (c.x, c.y), left_side_c))
-                    )
-                    if nearest_path:
-                        if nearest_path['distance'] == 0:
-                            return "%s %s" % (
-                                game_constants.ACTION_PICK,
-                                nearest_path['direction']
-                            )
-                else:
-                    # Throw away c
-                    if isinstance(own_chef.held_item, Ingredient):
-                        if own_chef.held_item.name == game_constants.INGREDIENT_C_NAME:
-                            nearest_path = self.__a_star(
-                                self.current_game_info['map'],
-                                (own_chef.x, own_chef.y),
-                                (
-                                    self.current_game_info['garbage_bin'].x,
-                                    self.current_game_info['garbage_bin'].y
-                                )
-                            )
-                            if nearest_path:
-                                if nearest_path['distance'] == 0:
-                                    return "%s %s" % (
-                                        game_constants.ACTION_PUT,
-                                        nearest_path['direction']
-                                    )
 
         elif self.__side == constants.SIDE_RIGHT:
             on_cutting_board_b_ingredients = []
@@ -1837,6 +1801,22 @@ class Agent():
                                         game_constants.ACTION_PUT,
                                         nearest_path['direction']
                                     )
+
+            elif action == constants.ACTION_PUT_ASIDE_C:
+                # Put b on side table
+                if isinstance(own_chef.held_item, Ingredient):
+                    if own_chef.held_item.name == game_constants.INGREDIENT_C_NAME:
+                        nearest_path = self.__get_nearest_path(
+                            self.current_game_info['map'],
+                            (own_chef.x, own_chef.y),
+                            empty_right_side_table_positions
+                        )
+                        if nearest_path:
+                            if nearest_path['distance'] == 0:
+                                return "%s %s" % (
+                                    game_constants.ACTION_PUT,
+                                    nearest_path['direction']
+                                )
 
             elif action == constants.ACTION_PUT_ASIDE_MIXED_BOWL:
                 if not own_chef.held_item:
