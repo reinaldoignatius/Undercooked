@@ -471,8 +471,15 @@ class World():
             print()
 
 
-    def print_obtained_reward(self):
-        print('Obtained reward:', self.obtained_reward)
+    def print_remaining_time(self):
+        print('Remaining time: ', self.remaining_time)
+
+
+    def print_obtained_reward_and_multiplier(self):
+        print('Obtained reward: %d Multiplier: %d' % (
+            self.obtained_reward,
+            self.reward_multiplier
+        ))
 
 
     def print_current_orders(self):
@@ -528,18 +535,13 @@ class World():
     def print_plates(self):
         for plate in self.plates:
             print('X: %d Y: %d Dirty: %s' % (plate.x, plate.y, plate.is_dirty))
-            for content in plate.contents:
-                from ingredient import Ingredient
-                if isinstance(content, Ingredient):
-                    print(content.name, end=' ')
-            print()
 
     
     def print_all_game_info(self):
-        print('Remaining time: ', self.remaining_time)
+        self.print_remaining_time()
         self.print_current_map()
         self.print_current_orders()
-        self.print_obtained_reward()
+        self.print_obtained_reward_and_multiplier()
         self.print_chefs()
         self.print_ingredients()
         self.print_containers()

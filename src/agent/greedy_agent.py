@@ -1748,7 +1748,7 @@ class Agent():
             self.current_game_info['plates']
         ))
         if self.__side == constants.SIDE_LEFT:
-            if len(right_side_clean_plates) < 2:
+            if len(right_side_clean_plates) <= 2:
                 actions_sort_by_priority_descending = [
                     constants.ACTION_PUT_ASIDE_MIXED_BOWL,
                     constants.ACTION_PASS_CLEAN_PLATE,
@@ -1777,7 +1777,7 @@ class Agent():
             ]
 
         else:
-            if len(right_side_clean_plates) < 2:
+            if len(right_side_clean_plates) <= 2:
                 if self.current_game_info['current_orders'][0].name == \
                         game_constants.ORDER_A_NAME:
                     actions_sort_by_priority_descending = [
@@ -1856,26 +1856,34 @@ class Agent():
         for action in actions_sort_by_priority_descending:
             if action == constants.ACTION_PASS_C:
                 left_side_c = list(filter(
-                    lambda ingredient: ingredient.name == game_constants.INGREDIENT_C_NAME and \
-                        ingredient.x <= constants.PASSING_TABLE_X,
+                    lambda ingredient: ingredient.x <= constants.PASSING_TABLE_X and \
+                        ingredient.name == game_constants.INGREDIENT_C_NAME,
                     self.current_game_info['ingredients'] 
                 ))
                 if len(left_side_c) >= 2:
                     continue
-            elif action == constants.ACTION_COOK_MIXED_BOWL or \
-                    action == constants.ACTION_COOK_B:
-                on_stove_cooked_cookable_container = list(filter(
-                    lambda cookable_container: cookable_container.is_cooked,
-                    list(map(
-                        lambda stove: stove.content,
-                        list(filter(
-                            lambda stove: stove.content,
-                            self.current_game_info['stoves']
-                        ))
-                    ))
+            elif action == constants.ACTION_COOK_B:
+                cooked_b = list(filter(
+                    lambda ingredient: len(ingredient.processes_done) == 2 and \
+                        ingredient.name == game_constants.INGREDIENT_B_NAME,
+                    self.current_game_info['ingredients']
                 ))
-                if on_stove_cooked_cookable_container:
+                if len(cooked_b) >= 2:
                     continue
+            # elif action == constants.ACTION_COOK_MIXED_BOWL or \
+            #         action == constants.ACTION_COOK_B:
+            #     on_stove_cooked_cookable_container = list(filter(
+            #         lambda cookable_container: cookable_container.is_cooked,
+            #         list(map(
+            #             lambda stove: stove.content,
+            #             list(filter(
+            #                 lambda stove: stove.content,
+            #                 self.current_game_info['stoves']
+            #             ))
+            #         ))
+            #     ))
+            #     if on_stove_cooked_cookable_container:
+            #         continue
             self.current_action = constants.LEFT_SIDE_ACTION_CHOICES.index(action) if \
                 self.__side == constants.SIDE_LEFT else \
                 constants.RIGHT_SIDE_ACTION_CHOICES.index(action)

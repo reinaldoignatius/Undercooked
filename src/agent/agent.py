@@ -2088,7 +2088,3 @@ class Agent():
     
     def save(self, episode):
         self.__model.save_weights('src/agent/%s_%d.hdf5' % (self.name, episode))
-
-    def print_model_weights(self):
-        for layer in self.__model.layers:
-            print(layer.get_weights())

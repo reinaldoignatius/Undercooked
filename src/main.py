@@ -200,10 +200,9 @@ if __name__ == '__main__':
             world.print_all_game_info()
             undercooked.world = world
             undercooked.send(UNDERCOOKED_ALIAS, world.get_all_game_info())
-            time.sleep(0.3)
+            time.sleep(0.5)
             world = undercooked.world
             world.simulate()
-            time.sleep(0.2)
 
         print('Episode: %d, Score: %d' % (
             episode,
