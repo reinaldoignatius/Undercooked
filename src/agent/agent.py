@@ -261,6 +261,8 @@ class Agent():
                 state.append(1)
             state.append(current_order.remaining_time)
             tracked_order_count += 1
+            if tracked_order_count == constants.SHOULD_TRACK_ORDER_COUNT:
+                break
         # Add padding for empty orders
         for __ in range(constants.SHOULD_TRACK_ORDER_COUNT - tracked_order_count):
             state.append(0)
