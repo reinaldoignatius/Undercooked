@@ -2038,9 +2038,19 @@ class Agent():
 
     def act(self):
         if np.random.rand() <= self.epsilon:
-            self.current_action = random.randrange(len(constants.LEFT_SIDE_ACTION_CHOICES) if 
-                self.__side == constants.SIDE_LEFT else 
-                len(constants.RIGHT_SIDE_ACTION_CHOICES))
+            action_indexes = list(range(
+                0,
+                len(constants.LEFT_SIDE_ACTION_CHOICES if \
+                    self.__side == constants.SIDE_LEFT else \
+                    constants.RIGHT_SIDE_ACTION_CHOICES) 
+            ))
+            is_valid_action_found = False
+            while not is_valid_action_found:
+                self.current_action = action_indexes[random.randrange(len(action_indexes))]
+                action_indexes.remove(self.current_action)
+                game_action = self.translate_to_game_action()
+                if game_action != "do nothing":
+                    is_valid_action_found = True
         else:
             act_values = self.__model.predict(self.current_state)
             self.current_action = np.argmax(act_values[0])

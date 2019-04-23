@@ -16,14 +16,18 @@ class Mixer(Table):
             chef.held_item = None
 
     def mix(self):
-        if self.content:
-            if self.content.contents:
-                if self.content.progress < constants.OVERMIX_TICKS:
-                    self.content.progress += 1
-                    if int(self.content.progress) == constants.MIX_TICKS:
-                        for ingredient in self.content.contents:
-                            ingredient.processes_done.append(constants.PROCESS_MIXED)
-                        self.content.is_mixed = True
+        bowl = self.content
+        if bowl:
+            if bowl.contents:
+                if bowl.progress < constants.OVERMIX_TICKS:
+                    bowl.progress += 1
+                    if int(bowl.progress) == constants.MIX_TICKS:
+                        if len(bowl.contents) < 2:
+                            self.__world.is_done = True
+                        else:
+                            for ingredient in bowl.contents:
+                                ingredient.processes_done.append(constants.PROCESS_MIXED)
+                            bowl.is_mixed = True
                     elif self.content.progress >= constants.OVERMIX_TICKS:
                         self.__world.is_done = True
         
