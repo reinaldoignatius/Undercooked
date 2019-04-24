@@ -38,7 +38,8 @@ def action_handler(agent, game_info):
     )
 
     if last_game_info:
-        reward = game_info['obtained_reward'] - last_game_info['obtained_reward']
+        reward = (game_info['obtained_reward'] - last_game_info['obtained_reward']) * \
+            constants.REWARD_MULTIPLIER
         reward -= constants.IDLE_PENALTY if agent.agent.current_action == 0 else 0
         agent.agent.remember(
             last_state,
@@ -70,7 +71,8 @@ def reset_handler(agent, __):
 
 def finish_handler(agent, message):
     game_info = message['game_info']
-    reward = game_info['obtained_reward'] - agent.agent.current_game_info['obtained_reward']
+    reward = (game_info['obtained_reward'] - agent.agent.current_game_info['obtained_reward']) \
+        * constants.REWARD_MULTIPLIER
     reward = -constants.EARLY_FINISH_PENALTY if game_info['remaining_time'] > 0 else 0
         
     agent.log_info('Received game info, requesting blackboard writings')
