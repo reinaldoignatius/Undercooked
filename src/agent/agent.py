@@ -2045,7 +2045,7 @@ class Agent():
                     constants.RIGHT_SIDE_ACTION_CHOICES) 
             ))
             is_valid_action_found = False
-            while not is_valid_action_found or not action_indexes:
+            while not is_valid_action_found and action_indexes:
                 self.current_action = action_indexes[random.randrange(len(action_indexes))]
                 action_indexes.remove(self.current_action)
                 game_action = self.translate_to_game_action()
