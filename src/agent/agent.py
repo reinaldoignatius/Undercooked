@@ -403,14 +403,16 @@ class Agent():
                 column 2: contain 'b'
             """
             if list(filter(
-                lambda ingredient: ingredient.name == game_constants.INGREDIENT_A_NAME,
+                lambda content: content.name == game_constants.INGREDIENT_A_NAME if \
+                    isinstance(content, Ingredient) else False,
                 plate.contents
             )):
                 state.append(1)
             else:
                 state.append(0)
             if list(filter(
-                lambda ingredient: ingredient.name == game_constants.INGREDIENT_B_NAME,
+                lambda content: content.name == game_constants.INGREDIENT_B_NAME if \
+                    isinstance(content, Ingredient) else False,
                 plate.contents
             )):
                 state.append(1)
