@@ -20,7 +20,9 @@ class Sink(Table, UsableObect):
                 while plate:
                     self.dirty_plates.append(plate)
                     if plate.contents:
-                        plate = plate.contents[0]
+                        new_plate = plate.contents[0]
+                        plate.contents.clear()
+                        plate = new_plate
                     else:
                         plate = None
             else:
