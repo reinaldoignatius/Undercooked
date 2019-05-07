@@ -20,6 +20,7 @@ class Agent():
 
         self.name = name
 
+        self.is_learning = False
         self.memory = deque(maxlen=constants.MEMORY_MAX_LENGTH)
 
         self.current_game_info = {}

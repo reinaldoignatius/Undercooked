@@ -29,6 +29,7 @@ class Agent():
 
         self.name = name
 
+        self.is_learning = True
         self.memory = deque(maxlen=constants.MEMORY_MAX_LENGTH)
         self.epsilon = constants.INITIAL_EPSILON
 
@@ -2039,14 +2040,14 @@ class Agent():
 
 
     def act(self):
-        if np.random.rand() <= self.epsilon:
+        is_valid_action_found = False
+        if self.is_learning and np.random.rand() <= self.epsilon:
             action_indexes = list(range(
                 0,
                 len(constants.LEFT_SIDE_ACTION_CHOICES if \
                     self.__side == constants.SIDE_LEFT else \
                     constants.RIGHT_SIDE_ACTION_CHOICES) 
             ))
-            is_valid_action_found = False
             while not is_valid_action_found and action_indexes:
                 self.current_action = action_indexes[random.randrange(len(action_indexes))]
                 action_indexes.remove(self.current_action)
@@ -2055,7 +2056,17 @@ class Agent():
                     is_valid_action_found = True
         else:
             act_values = self.__model.predict(self.current_state)
-            self.current_action = np.argmax(act_values[0])
+            action_values = list(act_values[0])
+            action_indexes = []
+            while action_values:
+                max_index = np.argmax(action_values)
+                action_values.pop(max_index)
+                action_indexes.append(max_index)
+            while not is_valid_action_found and action_indexes:
+                self.current_action = action_indexes.pop(0)
+                game_action = self.translate_to_game_action()
+                if game_action != "do nothing":
+                    is_valid_action_found = True
 
 
     def replay(self, batch_size):
@@ -2076,7 +2087,6 @@ class Agent():
     
 
     def load(self, episode):
-        self.__model.save_weights()
         self.__model.load_weights('src/agent/%s_%d.hdf5' % (self.name, episode))
 
     
