@@ -2055,8 +2055,7 @@ class Agent():
                 if game_action != "do nothing":
                     is_valid_action_found = True
         else:
-            act_values = self.__model.predict(self.current_state)
-            action_values = list(act_values[0])
+            action_values = list(self.__model.predict(self.current_state)[0])
             action_indexes = []
             while action_values:
                 max_index = np.argmax(action_values)
