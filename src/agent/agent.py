@@ -470,7 +470,8 @@ class Agent():
 
             # Filter out ingredients that are in plate
             for content in plate.contents:
-                ingredients.remove(content)
+                if isinstance(content, Ingredient):
+                    ingredients.remove(content)
 
         # Add ingredients
         ingredient_states = np.zeros(22)
