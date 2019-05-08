@@ -107,4 +107,4 @@ venv.bak/
 .vscode/
 
 # out file
-out
+out.log
