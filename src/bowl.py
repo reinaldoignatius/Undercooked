@@ -11,7 +11,7 @@ class Bowl(Container):
             if isinstance(chef.held_item, Bowl):
                 new_mixed = chef.held_item.is_mixed
                 chef.held_item.is_mixed = selfis_mixed
-                selfis_mixed = new_mixed
+                self.is_mixed = new_mixed
 
     def print(self):
         print('(', end='')  
