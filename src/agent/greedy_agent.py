@@ -1871,7 +1871,6 @@ class Agent():
                 constants.RIGHT_SIDE_ACTION_CHOICES.index(action)
             game_action = self.translate_to_game_action()
             if game_action != "do nothing": return
-        self.current_action = 0
 
 
     def replay(self, batch_size):
