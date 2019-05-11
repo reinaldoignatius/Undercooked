@@ -10,7 +10,7 @@ class Bowl(Container):
             super().put_on_chef_held_item(chef)
             if isinstance(chef.held_item, Bowl):
                 new_mixed = chef.held_item.is_mixed
-                chef.held_item.is_mixed = selfis_mixed
+                chef.held_item.is_mixed = self.is_mixed
                 self.is_mixed = new_mixed
 
     def print(self):
