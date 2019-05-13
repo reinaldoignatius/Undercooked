@@ -19,7 +19,8 @@ class Agent():
         self.__side = side
 
         self.__model = Sequential()
-        self.__model.add(Dense(53, input_dim=constants.STATE_SIZE, activation='relu'))
+        self.__model.add(Dense(60, input_dim=constants.STATE_SIZE, activation='relu'))
+        self.__model.add(Dense(20, input_dim=constants.STATE_SIZE, activation='relu'))
         self.__model.add(Dense(
             len(constants.LEFT_SIDE_ACTION_CHOICES) if self.__side == constants.SIDE_LEFT 
                 else len(constants.RIGHT_SIDE_ACTION_CHOICES), 
