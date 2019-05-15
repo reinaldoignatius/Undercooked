@@ -1,5 +1,6 @@
 import os
 import time
+import math
 
 from osbrain import run_nameserver
 from osbrain import run_agent
@@ -79,6 +80,12 @@ if __name__ == '__main__':
     undercooked.send(INIT_ALIAS, None)
     time.sleep(1)
 
+    min_score = math.inf
+    max_score = 0
+    total_score = 0
+    total_submited_a = 0
+    total_submited_b = 0
+
     for episode in range(agent_constants.EPISODES_COUNT):
         # Setup Undercooked world
         world = World()
@@ -100,9 +107,23 @@ if __name__ == '__main__':
             world = undercooked.world
             world.simulate()
 
-        print('Episode: %d, Score: %d' % (
-            episode,
-            world.get_all_game_info()['obtained_reward'],
+        score = world.get_all_game_info()['obtained_reward']
+        if score < min_score:
+            min_score = score
+        if score > max_score:
+            max_score = score
+        total_score += score
+        print('Episode: %d, Score: %d, Max multiplier: %d' % (
+            episode + 1,
+            score,
+            world.max_multiplier
+        ))
+
+        total_submited_a += world.submited_a_count
+        total_submited_b += world.submited_b_count
+        print("Submited a: %d, Submited b: %d" %(
+            world.submited_a_count,
+            world.submited_b_count
         ))
 
         undercooked.send(FINISH_ALIAS, {
@@ -110,5 +131,15 @@ if __name__ == '__main__':
             'episode': episode + 1
         })
         time.sleep(10)
+
+    print("Score min: %d, max: %d, total: %d" % (
+        min_score,
+        max_score,
+        total_score
+    ))
+    print("Submited a: %d, b: %d" % (
+        total_submited_a,
+        total_submited_b
+    ))
 
     ns.shutdown()
