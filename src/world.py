@@ -47,6 +47,11 @@ class World():
         self.remaining_time = 0
         self.is_done = False
 
+        # Stats
+        self.max_multiplier = 0
+        self.submited_a_count = 0
+        self.submited_b_count = 0
+
         self.__time_between_orders = 0
         self.__time_until_next_order = 0
         self.__current_bowl_id = '('
@@ -424,9 +429,17 @@ class World():
                 if match_idx == 0:
                     if self.reward_multiplier < constants.MAX_REWARD_MULTIPLIER:
                         self.reward_multiplier += 1
+
+                        if self.reward_multiplier > self.max_multiplier:
+                            self.max_multiplier = self.reward_multiplier
+
                 else:
                     self.reward_multiplier = 1
                     
+                if current_order.name == constants.ORDER_A_NAME:
+                    self.submited_a_count += 1
+                    self.submited_b_count += 1
+
                 break
         if match_idx != -1:
             self.current_orders.pop(match_idx)
