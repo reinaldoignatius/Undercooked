@@ -85,6 +85,9 @@ if __name__ == '__main__':
     total_score = 0
     total_submited_a = 0
     total_submited_b = 0
+    min_remaining_time = math.inf
+    max_remaining_time = 0
+    total_remaining_time = 0
 
     for episode in range(agent_constants.EPISODES_COUNT):
         # Setup Undercooked world
@@ -126,6 +129,13 @@ if __name__ == '__main__':
             world.submited_b_count
         ))
 
+        remaining_time = world.get_all_game_info()['remaining_time']
+        if remaining_time < min_remaining_time:
+            min_remaining_time = remaining_time
+        if remaining_time > max_remaining_time:
+            max_remaining_time = remaining_time
+        total_remaining_time += remaining_time
+
         undercooked.send(FINISH_ALIAS, {
             'game_info': world.get_all_game_info(),
             'episode': episode + 1
@@ -140,6 +150,11 @@ if __name__ == '__main__':
     print("Submited a: %d, b: %d" % (
         total_submited_a,
         total_submited_b
+    ))
+    print("Time min: %d, max: %d, total: %d" % (
+        min_remaining_time,
+        max_remaining_time,
+        total_remaining_time
     ))
 
     ns.shutdown()
