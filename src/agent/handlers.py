@@ -1,4 +1,5 @@
 import sys
+import constants as game_constants
 from . import constants
 from agent.agent import Agent
 from agent.greedy_agent import Agent as GreedyAgent
@@ -47,6 +48,15 @@ def action_handler(agent, game_info):
         reward = (game_info['obtained_reward'] - last_game_info['obtained_reward']) * \
             constants.REWARD_MULTIPLIER
         reward -= constants.IDLE_PENALTY if agent.agent.current_action == 0 else 0
+        
+        left_side_c = list(filter(
+            lambda ingredient: ingredient.x <= constants.PASSING_TABLE_X and \
+                ingredient.name == game_constants.INGREDIENT_C_NAME,
+            game_info['ingredients'] 
+        ))
+        if len(left_side_c) > 2:
+            reward -= constants.C_PENALTY
+
         agent.agent.remember(
             last_state,
             agent.agent.current_action,
