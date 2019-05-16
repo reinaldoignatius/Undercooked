@@ -49,13 +49,14 @@ def action_handler(agent, game_info):
             constants.REWARD_MULTIPLIER
         reward -= constants.IDLE_PENALTY if agent.agent.current_action == 0 else 0
         
-        left_side_c = list(filter(
-            lambda ingredient: ingredient.x <= constants.PASSING_TABLE_X and \
-                ingredient.name == game_constants.INGREDIENT_C_NAME,
-            game_info['ingredients'] 
-        ))
-        if len(left_side_c) > 2:
-            reward -= constants.C_PENALTY
+        if agent.name == 'chef_2' or agent.name == 'chef_4':
+            left_side_c = list(filter(
+                lambda ingredient: ingredient.x <= constants.PASSING_TABLE_X and \
+                    ingredient.name == game_constants.INGREDIENT_C_NAME,
+                game_info['ingredients'] 
+            ))
+            if len(left_side_c) >= 2 and agent.agent.current_action == 1:
+                reward -= constants.C_PENALTY
 
         agent.agent.remember(
             last_state,
