@@ -438,6 +438,7 @@ class World():
                     
                 if current_order.name == constants.ORDER_A_NAME:
                     self.submited_a_count += 1
+                elif current_order.name == constants.ORDER_B_NAME:
                     self.submited_b_count += 1
 
                 break
