@@ -304,6 +304,11 @@ class Agent():
             ))
 
             if action == constants.ACTION_CUT_A:
+                left_side_empty_cutting_boards = list(filter(
+                    lambda cutting_board: not cutting_board.content and \
+                        cutting_board.x < constants.PASSING_TABLE_X,
+                    self.current_game_info['cutting_boards']    
+                ))
                 if not own_chef.held_item:
                     uncut_a_ingredients = list(filter(
                         lambda ingredient: \
@@ -339,48 +344,44 @@ class Agent():
                                     game_constants.ACTION_USE, 
                                     nearest_path['direction']
                                 )
-                    # Get uncut a from table
-                    elif not_on_cutting_board_uncut_a_ingredients:
-                        nearest_path = self.__get_nearest_path(
-                            self.current_game_info['map'],
-                            (own_chef.x, own_chef.y),
-                            list(map(
-                                lambda a: (a.x, a.y),
-                                not_on_cutting_board_uncut_a_ingredients
-                            ))
-                        )
-                        if nearest_path:
-                            if nearest_path['distance'] == 0:
-                                return "%s %s" % (
-                                    game_constants.ACTION_PICK,
-                                    nearest_path['direction']
-                                )
-                    # Get a from box
-                    else:
-                        nearest_path = self.__a_star(
-                            self.current_game_info['map'],
-                            (own_chef.x, own_chef.y),
-                            (
-                                ingredient_boxes[game_constants.INGREDIENT_A_NAME].x,
-                                ingredient_boxes[game_constants.INGREDIENT_A_NAME].y
+                    elif left_side_empty_cutting_boards:
+                        # Get uncut a from table
+                        if not_on_cutting_board_uncut_a_ingredients:
+                            nearest_path = self.__get_nearest_path(
+                                self.current_game_info['map'],
+                                (own_chef.x, own_chef.y),
+                                list(map(
+                                    lambda a: (a.x, a.y),
+                                    not_on_cutting_board_uncut_a_ingredients
+                                ))
                             )
-                        )
-                        if nearest_path:
-                            if nearest_path['distance'] == 0:
-                                return "%s %s" % (
-                                    game_constants.ACTION_USE, 
-                                    nearest_path['direction']
+                            if nearest_path:
+                                if nearest_path['distance'] == 0:
+                                    return "%s %s" % (
+                                        game_constants.ACTION_PICK,
+                                        nearest_path['direction']
+                                    )
+                        # Get a from box
+                        else:
+                            nearest_path = self.__a_star(
+                                self.current_game_info['map'],
+                                (own_chef.x, own_chef.y),
+                                (
+                                    ingredient_boxes[game_constants.INGREDIENT_A_NAME].x,
+                                    ingredient_boxes[game_constants.INGREDIENT_A_NAME].y
                                 )
+                            )
+                            if nearest_path:
+                                if nearest_path['distance'] == 0:
+                                    return "%s %s" % (
+                                        game_constants.ACTION_USE, 
+                                        nearest_path['direction']
+                                    )
                 # Put uncut a on cutting board
                 else:
                     if isinstance(own_chef.held_item, Ingredient):
                         if own_chef.held_item.name == game_constants.INGREDIENT_A_NAME and \
                                 not own_chef.held_item.processes_done:
-                            left_side_empty_cutting_boards = list(filter(
-                                lambda cutting_board: not cutting_board.content and \
-                                    cutting_board.x < constants.PASSING_TABLE_X,
-                                self.current_game_info['cutting_boards']    
-                            ))
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
@@ -942,6 +943,11 @@ class Agent():
             ))
 
             if action == constants.ACTION_CUT_B:
+                right_side_empty_cutting_boards = list(filter(
+                    lambda cutting_board: not cutting_board.content and \
+                        cutting_board.x > constants.PASSING_TABLE_X,
+                    self.current_game_info['cutting_boards']    
+                ))
                 if not own_chef.held_item:
                     uncut_b_ingredients = list(filter(
                         lambda ingredient:
@@ -977,48 +983,44 @@ class Agent():
                                     game_constants.ACTION_USE, 
                                     nearest_path['direction']
                                 )
-                    # Get uncut b from table
-                    elif not_on_cutting_board_uncut_b_ingredients:
-                        nearest_path = self.__get_nearest_path(
-                            self.current_game_info['map'],
-                            (own_chef.x, own_chef.y),
-                            list(map(
-                                lambda b: (b.x, b.y),
-                                not_on_cutting_board_uncut_b_ingredients
-                            ))
-                        )
-                        if nearest_path:
-                            if nearest_path['distance'] == 0:
-                                return "%s %s" % (
-                                    game_constants.ACTION_PICK,
-                                    nearest_path['direction']
-                                )
-                    # Get b from box
-                    else:
-                        nearest_path = self.__a_star(
-                            self.current_game_info['map'],
-                            (own_chef.x, own_chef.y),
-                            (
-                                ingredient_boxes[game_constants.INGREDIENT_B_NAME].x,
-                                ingredient_boxes[game_constants.INGREDIENT_B_NAME].y
+                    elif right_side_empty_cutting_boards:
+                        # Get uncut b from table
+                        if not_on_cutting_board_uncut_b_ingredients:
+                            nearest_path = self.__get_nearest_path(
+                                self.current_game_info['map'],
+                                (own_chef.x, own_chef.y),
+                                list(map(
+                                    lambda b: (b.x, b.y),
+                                    not_on_cutting_board_uncut_b_ingredients
+                                ))
                             )
-                        )
-                        if nearest_path:
-                            if nearest_path['distance'] == 0:
-                                return "%s %s" % (
-                                    game_constants.ACTION_USE, 
-                                    nearest_path['direction']
+                            if nearest_path:
+                                if nearest_path['distance'] == 0:
+                                    return "%s %s" % (
+                                        game_constants.ACTION_PICK,
+                                        nearest_path['direction']
+                                    )
+                        # Get b from box
+                        else:
+                            nearest_path = self.__a_star(
+                                self.current_game_info['map'],
+                                (own_chef.x, own_chef.y),
+                                (
+                                    ingredient_boxes[game_constants.INGREDIENT_B_NAME].x,
+                                    ingredient_boxes[game_constants.INGREDIENT_B_NAME].y
                                 )
+                            )
+                            if nearest_path:
+                                if nearest_path['distance'] == 0:
+                                    return "%s %s" % (
+                                        game_constants.ACTION_USE, 
+                                        nearest_path['direction']
+                                    )
                 # Put uncut b on cutting board
                 else:
                     if isinstance(own_chef.held_item, Ingredient):
                         if own_chef.held_item.name == game_constants.INGREDIENT_B_NAME and \
                                 not own_chef.held_item.processes_done:
-                            right_side_empty_cutting_boards = list(filter(
-                                lambda cutting_board: not cutting_board.content and \
-                                    cutting_board.x > constants.PASSING_TABLE_X,
-                                self.current_game_info['cutting_boards']    
-                            ))
                             nearest_path = self.__get_nearest_path(
                                 self.current_game_info['map'],
                                 (own_chef.x, own_chef.y),
@@ -1871,7 +1873,6 @@ class Agent():
                 constants.RIGHT_SIDE_ACTION_CHOICES.index(action)
             game_action = self.translate_to_game_action()
             if game_action != "do nothing": return
-        self.current_action = 0
 
 
     def replay(self, batch_size):
