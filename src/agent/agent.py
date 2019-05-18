@@ -2181,18 +2181,14 @@ class Agent():
                 game_action = self.translate_to_game_action()
                 if game_action != "do nothing": return
         else:
-            action_values = list(self.__model.predict(self.current_state)[0])
-            action_indexes = []
-            while action_values:
-                max_index = np.argmax(action_values)
-                action_values.pop(max_index)
-                action_indexes.append(max_index)
+            action_values = dict(enumerate(self.__model.predict(self.current_state)[0]))
+            action_indexes = sorted(action_values, key=action_values.get, reverse=True)
+
             while not is_valid_action_found and action_indexes:
                 self.current_action = action_indexes.pop(0)
                 game_action = self.translate_to_game_action()
                 if game_action != "do nothing":
                     is_valid_action_found = True
-
 
     def replay(self, batch_size):
         minibatch = random.sample(self.memory, batch_size)
