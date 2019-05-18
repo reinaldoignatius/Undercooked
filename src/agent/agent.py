@@ -2046,140 +2046,18 @@ class Agent():
     def act(self):
         is_valid_action_found = False
         if self.is_learning and np.random.rand() <= self.epsilon:
-            actions_sort_by_priority_descending = []
-            right_side_clean_plates = list(filter(
-                lambda plate: plate.x >= constants.PASSING_TABLE_X and not plate.is_dirty,
-                self.current_game_info['plates']
-            ))
-            if self.__side == constants.SIDE_LEFT:
-                if len(right_side_clean_plates) <= 2:
-                    actions_sort_by_priority_descending = [
-                        constants.ACTION_PUT_ASIDE_MIXED_BOWL,
-                        constants.ACTION_PASS_CLEAN_PLATE,
-                        constants.ACTION_WASH_PLATE,
-                        constants.ACTION_PASS_MIXED_BOWL,
-                        constants.ACTION_MIX_A_AND_C,
-                        constants.ACTION_CUT_A,
-                    ]
-                else:
-                    actions_sort_by_priority_descending = [
-                        constants.ACTION_PASS_MIXED_BOWL,
-                        constants.ACTION_PASS_CLEAN_PLATE,
-                        constants.ACTION_MIX_A_AND_C,
-                        constants.ACTION_WASH_PLATE,
-                        constants.ACTION_CUT_A,
-                        constants.ACTION_PUT_ASIDE_MIXED_BOWL
-                    ]
-
-                actions_sort_by_priority_descending += [
-                    constants.ACTION_PUT_ASIDE_DIRTY_PLATE,
-                    constants.ACTION_PUT_ASIDE_EMPTY_BOWL,
-                    constants.ACTION_PUT_ASIDE_C,
-                    constants.ACTION_PUT_ASIDE_A,
-                    constants.ACTION_THROW_AWAY_A,
-                    constants.ACTION_DO_NOTHING, 
-                ]
-
-            else:
-                if len(right_side_clean_plates) <= 2:
-                    if self.current_game_info['current_orders'][0].name == \
-                            game_constants.ORDER_A_NAME:
-                        actions_sort_by_priority_descending = [
-                            constants.ACTION_PLATE_MIX,
-                            constants.ACTION_PUT_ASIDE_PLATED_MIX,
-                            constants.ACTION_PLATE_B,
-                            constants.ACTION_PUT_ASIDE_PLATED_B,
-                            constants.ACTION_PUT_ASIDE_COOKED_CONTAINER,
-                            constants.ACTION_PASS_DIRTY_PLATE,
-                            constants.ACTION_SUBMIT_MIX,
-                            constants.ACTION_COOK_MIXED_BOWL,
-                            constants.ACTION_PASS_C
-                        ]
-                    else:
-                        actions_sort_by_priority_descending = [
-                            constants.ACTION_PLATE_B,
-                            constants.ACTION_PUT_ASIDE_PLATED_B,
-                            constants.ACTION_PLATE_MIX,
-                            constants.ACTION_PUT_ASIDE_PLATED_MIX,
-                            constants.ACTION_PUT_ASIDE_COOKED_CONTAINER,
-                            constants.ACTION_PASS_DIRTY_PLATE,
-                            constants.ACTION_SUBMIT_B,
-                            constants.ACTION_COOK_B,
-                            constants.ACTION_CUT_B
-                        ]
-                else:
-                    if self.current_game_info['current_orders'][0].name == \
-                            game_constants.ORDER_A_NAME:
-                        actions_sort_by_priority_descending = [
-                            constants.ACTION_SUBMIT_MIX,
-                            constants.ACTION_PLATE_MIX,
-                            constants.ACTION_PLATE_B,
-                            constants.ACTION_PUT_ASIDE_PLATED_B,
-                            constants.ACTION_PUT_ASIDE_PLATED_MIX,
-                            constants.ACTION_COOK_MIXED_BOWL,
-                            constants.ACTION_PUT_ASIDE_COOKED_CONTAINER,
-                            constants.ACTION_PASS_C,
-                            constants.ACTION_PASS_DIRTY_PLATE
-                        ]
-                    else:
-                        actions_sort_by_priority_descending = [
-                            constants.ACTION_SUBMIT_B,
-                            constants.ACTION_PLATE_B,
-                            constants.ACTION_PLATE_MIX,
-                            constants.ACTION_PUT_ASIDE_PLATED_MIX,
-                            constants.ACTION_PUT_ASIDE_PLATED_B,
-                            constants.ACTION_COOK_B,
-                            constants.ACTION_PUT_ASIDE_COOKED_CONTAINER,
-                            constants.ACTION_CUT_B,
-                            constants.ACTION_PASS_DIRTY_PLATE
-                        ]
-                
-                actions_sort_by_priority_descending += [
-                    constants.ACTION_PUT_ASIDE_CLEAN_PLATE,
-                    constants.ACTION_PUT_ASIDE_MIXED_BOWL,
-                ]
-
-                if self.current_game_info['current_orders'][0].name == \
-                        game_constants.ORDER_A_NAME:
-                    actions_sort_by_priority_descending += [
-                        constants.ACTION_COOK_B,
-                        constants.ACTION_CUT_B,
-                    ]
-                else:
-                    actions_sort_by_priority_descending += [
-                        constants.ACTION_COOK_MIXED_BOWL,
-                        constants.ACTION_PASS_C,
-                    ]
-
-                actions_sort_by_priority_descending += [
-                    constants.ACTION_PUT_ASIDE_B,
-                    constants.ACTION_PUT_ASIDE_C,
-                    constants.ACTION_THROW_AWAY_C,
-                    constants.ACTION_THROW_AWAY_B
-                ]
-
-            for action in actions_sort_by_priority_descending:
-                if action == constants.ACTION_PASS_C:
-                    left_side_c = list(filter(
-                        lambda ingredient: ingredient.x <= constants.PASSING_TABLE_X and \
-                            ingredient.name == game_constants.INGREDIENT_C_NAME,
-                        self.current_game_info['ingredients'] 
-                    ))
-                    if len(left_side_c) >= 2:
-                        continue
-                elif action == constants.ACTION_COOK_B:
-                    cooked_b = list(filter(
-                        lambda ingredient: len(ingredient.processes_done) == 2 and \
-                            ingredient.name == game_constants.INGREDIENT_B_NAME,
-                        self.current_game_info['ingredients']
-                    ))
-                    if len(cooked_b) >= 2:
-                        continue
-                self.current_action = constants.LEFT_SIDE_ACTION_CHOICES.index(action) if \
+            action_indexes = list(range(
+                0,
+                len(constants.LEFT_SIDE_ACTION_CHOICES if \
                     self.__side == constants.SIDE_LEFT else \
-                    constants.RIGHT_SIDE_ACTION_CHOICES.index(action)
+                    constants.RIGHT_SIDE_ACTION_CHOICES) 
+            ))
+            while not is_valid_action_found and action_indexes:
+                self.current_action = action_indexes[random.randrange(len(action_indexes))]
+                action_indexes.remove(self.current_action)
                 game_action = self.translate_to_game_action()
-                if game_action != "do nothing": return
+                if game_action != "do nothing":
+                    is_valid_action_found = True
         else:
             action_values = dict(enumerate(self.__model.predict(self.current_state)[0]))
             action_indexes = sorted(action_values, key=action_values.get, reverse=True)
