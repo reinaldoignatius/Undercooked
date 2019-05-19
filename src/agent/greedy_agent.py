@@ -1755,8 +1755,7 @@ class Agent():
                 constants.ACTION_PUT_ASIDE_EMPTY_BOWL,
                 constants.ACTION_PUT_ASIDE_C,
                 constants.ACTION_PUT_ASIDE_A,
-                constants.ACTION_THROW_AWAY_A,
-                constants.ACTION_THROW_AWAY_C
+                constants.ACTION_THROW_AWAY_A
             ]
 
         else:
