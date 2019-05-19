@@ -83,7 +83,11 @@ if __name__ == '__main__':
     min_score = math.inf
     max_score = 0
     total_score = 0
+    min_submited_a = math.inf
+    max_submited_a = 0
     total_submited_a = 0
+    min_submited_b = math.inf
+    max_submited_b = 0
     total_submited_b = 0
     min_remaining_time = math.inf
     max_remaining_time = 0
@@ -122,7 +126,16 @@ if __name__ == '__main__':
             world.max_multiplier
         ))
 
+        if world.submited_a_count < min_submited_a:
+            min_submited_a = world.submited_a_count
+        if world.submited_a_count > max_submited_a:
+            max_submited_b = world.submited_b_count            
         total_submited_a += world.submited_a_count
+
+        if world.submited_b_count < min_submited_b:
+            min_submited_b = world.submited_b_count
+        if world.submited_b_count > max_submited_b:
+            max_submited_b = world.submited_b_count
         total_submited_b += world.submited_b_count
         print("Submited a: %d, Submited b: %d" %(
             world.submited_a_count,
@@ -147,8 +160,14 @@ if __name__ == '__main__':
         max_score,
         total_score
     ))
-    print("Submited a: %d, b: %d" % (
-        total_submited_a,
+    print("Submited a min: %d, max: %d, total: %d" % (
+        min_submited_a,
+        max_submited_a,
+        total_submited_a
+    ))
+    print("Submited b min: %d, max: %d, total: %d" % (
+        min_submited_b,
+        max_submited_b,
         total_submited_b
     ))
     print("Time min: %d, max: %d, total: %d" % (
