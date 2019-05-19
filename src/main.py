@@ -92,6 +92,9 @@ if __name__ == '__main__':
     min_remaining_time = math.inf
     max_remaining_time = 0
     total_remaining_time = 0
+    min_multiplier = math.inf
+    max_multiplier = 0
+    total_multiplier = 0
 
     for episode in range(agent_constants.EPISODES_COUNT):
         # Setup Undercooked world
@@ -149,6 +152,12 @@ if __name__ == '__main__':
             max_remaining_time = remaining_time
         total_remaining_time += remaining_time
 
+        if world.max_multiplier < min_multiplier:
+            min_multiplier = world.max_multiplier
+        if world.max_multiplier > max_multiplier:
+            max_multiplier = world.max_multiplier
+        total_multiplier += world.max_multiplier
+
         undercooked.send(FINISH_ALIAS, {
             'game_info': world.get_all_game_info(),
             'episode': episode + 1
@@ -173,6 +182,11 @@ if __name__ == '__main__':
     print("Time min: %d, max: %d, total: %d" % (
         min_remaining_time,
         max_remaining_time,
+        total_remaining_time
+    ))
+    print("Multiplier min: 5d, maax: 5d, total: %d" % (
+        min_multiplier,
+        max_multiplier,
         total_remaining_time
     ))
 
