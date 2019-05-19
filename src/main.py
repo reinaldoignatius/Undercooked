@@ -129,7 +129,7 @@ if __name__ == '__main__':
         if world.submited_a_count < min_submited_a:
             min_submited_a = world.submited_a_count
         if world.submited_a_count > max_submited_a:
-            max_submited_b = world.submited_b_count            
+            max_submited_a = world.submited_a_count            
         total_submited_a += world.submited_a_count
 
         if world.submited_b_count < min_submited_b:
