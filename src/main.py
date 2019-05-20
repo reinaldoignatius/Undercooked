@@ -184,10 +184,10 @@ if __name__ == '__main__':
         max_remaining_time,
         total_remaining_time
     ))
-    print("Multiplier min: 5d, maax: 5d, total: %d" % (
+    print("Multiplier min: %d, max: %d, total: %d" % (
         min_multiplier,
         max_multiplier,
-        total_remaining_time
+        total_multiplier
     ))
 
     ns.shutdown()
